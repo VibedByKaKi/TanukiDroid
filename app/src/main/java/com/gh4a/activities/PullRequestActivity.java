@@ -33,6 +33,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.BaseFragmentPagerActivity;
 import com.gh4a.Gh4Application;
 import com.gh4a.R;
@@ -163,7 +164,7 @@ public class PullRequestActivity extends BaseFragmentPagerActivity implements
 
     @NonNull
     protected String getActionBarTitle() {
-        return getString(R.string.pull_request_title) + " #" + mPullRequestNumber;
+        return getString(R.string.pull_request_title) + " " + GitLabUrls.formatNumber(mPullRequestNumber);
     }
 
     @Nullable
@@ -246,14 +247,14 @@ public class PullRequestActivity extends BaseFragmentPagerActivity implements
                 break;
             case R.id.share:
                 IntentUtils.share(this, getString(R.string.share_pull_subject,
-                        mPullRequest.number(), mPullRequest.title(),
+                        GitLabUrls.formatNumber(mPullRequest.number()), mPullRequest.title(),
                         mRepoOwner + "/" + mRepoName), Uri.parse(mPullRequest.htmlUrl()));
                 break;
             case R.id.browser:
                 IntentUtils.launchBrowser(this, Uri.parse(mPullRequest.htmlUrl()));
                 break;
             case R.id.copy_number:
-                IntentUtils.copyToClipboard(this, "Pull Request #" + mPullRequest.number(),
+                IntentUtils.copyToClipboard(this, "Pull Request " + GitLabUrls.formatNumber(mPullRequest.number()),
                         String.valueOf(mPullRequest.number()));
                 return true;
         }
@@ -485,7 +486,7 @@ public class PullRequestActivity extends BaseFragmentPagerActivity implements
     }
 
     private void mergePullRequest(String commitTitle, String commitDetails, MergeRequest.Method mergeMethod) {
-        String errorMessage = getString(R.string.pull_error_merge, mPullRequest.number());
+        String errorMessage = getString(R.string.pull_error_merge, GitLabUrls.formatNumber(mPullRequest.number()));
         PullRequestService service = ServiceFactory.get(PullRequestService.class, false);
         MergeRequest request = MergeRequest.builder()
                 .commitTitle(commitTitle)
@@ -607,7 +608,7 @@ public class PullRequestActivity extends BaseFragmentPagerActivity implements
 
             final PullRequestActivity activity = (PullRequestActivity) getContext();
             return new AlertDialog.Builder(activity)
-                    .setTitle(getString(R.string.pull_message_dialog_title, mPr.number()))
+                    .setTitle(getString(R.string.pull_message_dialog_title, GitLabUrls.formatNumber(mPr.number())))
                     .setView(view)
                     .setPositiveButton(R.string.pull_request_merge, (dialog, which) -> {
                         String commitTitle = mTitleField.getEditText().getText().toString();

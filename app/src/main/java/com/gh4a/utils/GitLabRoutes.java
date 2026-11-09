@@ -144,6 +144,8 @@ final class GitLabRoutes {
         } else if ("updated".equals(sort) || "pushed".equals(sort)) {
             orderBy = "last_activity_at";
         }
+        q.add("statistics");
+        q.add("true");
         q.add("order_by");
         q.add(orderBy);
         String dir = c.q("direction");
@@ -694,6 +696,7 @@ final class GitLabRoutes {
             if (tree.ok() && tree.arr().length() > 0) {
                 JSONArray in = tree.arr();
                 JSONArray out = new JSONArray();
+                Map<String, Integer> sizes = blobSizes(c, ref, in);
                 String web = c.instance() + "/" + c.p("owner") + "/" + c.p("repo");
                 for (int i = 0; i < in.length(); i++) {
                     JSONObject e = in.optJSONObject(i);
@@ -703,7 +706,8 @@ final class GitLabRoutes {
                     put(o, "path", str(e, "path"));
                     put(o, "sha", str(e, "id"));
                     put(o, "type", dir ? "dir" : "file");
-                    put(o, "size", 0);
+                    Integer size = sizes.get(str(e, "path"));
+                    put(o, "size", size != null ? size : 0);
                     put(o, "html_url", web + "/-/" + (dir ? "tree/" : "blob/") + ref + "/"
                             + str(e, "path"));
                     put(o, "download_url", dir ? null : web + "/-/raw/" + ref + "/"
@@ -717,6 +721,49 @@ final class GitLabRoutes {
             }
         }
         return fileResponse(c, path, ref);
+    }
+
+    /** The tree API has no file sizes, GraphQL does. Failures only mean that sizes stay unknown. */
+    private static Map<String, Integer> blobSizes(Ctx c, String ref, JSONArray tree) {
+        Map<String, Integer> sizes = new HashMap<>();
+        try {
+            JSONArray paths = new JSONArray();
+            for (int i = 0; i < tree.length(); i++) {
+                JSONObject e = tree.optJSONObject(i);
+                if (e != null && "blob".equals(str(e, "type"))) {
+                    paths.put(str(e, "path"));
+                }
+            }
+            if (paths.length() == 0) {
+                return sizes;
+            }
+            JSONObject body = newObj();
+            put(body, "query", "query($p: ID!, $paths: [String!]!, $ref: String) {"
+                    + " project(fullPath: $p) { repository { blobs(paths: $paths, ref: $ref) {"
+                    + " nodes { path rawSize } } } } }");
+            JSONObject vars = newObj();
+            put(vars, "p", c.p("owner") + "/" + c.p("repo"));
+            put(vars, "paths", paths);
+            put(vars, "ref", ref);
+            put(body, "variables", vars);
+            Up up = c.call("POST", "/graphql", body);
+            if (!up.ok()) {
+                return sizes;
+            }
+            JSONObject data = up.obj().optJSONObject("data");
+            JSONObject project = data != null ? data.optJSONObject("project") : null;
+            JSONObject repo = project != null ? project.optJSONObject("repository") : null;
+            JSONObject blobs = repo != null ? repo.optJSONObject("blobs") : null;
+            JSONArray nodes = blobs != null ? blobs.optJSONArray("nodes") : null;
+            for (int i = 0; nodes != null && i < nodes.length(); i++) {
+                JSONObject n = nodes.optJSONObject(i);
+                sizes.put(str(n, "path"), (int) Math.min(Integer.MAX_VALUE,
+                        Long.parseLong(n.optString("rawSize", "0"))));
+            }
+        } catch (IOException | NumberFormatException ignored) {
+            // keep what we have
+        }
+        return sizes;
     }
 
     private static Response fileResponse(Ctx c, String path, String ref) throws IOException {
@@ -756,19 +803,9 @@ final class GitLabRoutes {
     }
 
     static Response renderMarkdown(Ctx c, String text, String path) throws IOException {
-        JSONObject body = newObj();
-        put(body, "text", text);
-        boolean markdown = path == null || path.toLowerCase(Locale.US).matches(".*\\.(md|markdown|mdown|mkd)$")
-                || !path.contains(".");
-        put(body, "gfm", true);
-        put(body, "project", c.p("owner") + "/" + c.p("repo"));
-        Up up = c.call("POST", "/markdown", body);
-        if (!up.ok()) {
-            return c.error(up);
-        }
-        String html = str(up.obj(), "html");
-        return c.raw(new Up(200, (html != null ? html : "").getBytes(StandardCharsets.UTF_8),
-                up.headers), "text/html; charset=utf-8");
+        String html = GitLabHtml.render(c, text, c.p("owner") + "/" + c.p("repo"));
+        return c.raw(new Up(200, html.getBytes(StandardCharsets.UTF_8), okhttp3.Headers.of()),
+                "text/html; charset=utf-8");
     }
 
     private static Response writeFile(Ctx c, boolean delete) throws IOException {
@@ -1149,15 +1186,15 @@ final class GitLabRoutes {
         });
         route("GET", "repos/{owner}/{repo}/releases/latest", c -> {
             Up up = c.get("/projects/" + c.project() + "/releases/permalink/latest");
-            return up.ok() ? c.json(release(c, up.obj())) : c.error(up);
+            return up.ok() ? c.json(htmlRelease(c, up.obj())) : c.error(up);
         });
         route("GET", "repos/{owner}/{repo}/releases/tags/{tag*}", c -> {
             Up up = c.get("/projects/" + c.project() + "/releases/" + enc(c.p("tag")));
-            return up.ok() ? c.json(release(c, up.obj())) : c.error(up);
+            return up.ok() ? c.json(htmlRelease(c, up.obj())) : c.error(up);
         });
         route("GET", "repos/{owner}/{repo}/releases/{id}", c -> {
             JSONObject r = releaseById(c, Long.parseLong(c.p("id")));
-            return r != null ? c.json(release(c, r)) : c.notFound("Release not found");
+            return r != null ? c.json(htmlRelease(c, r)) : c.notFound("Release not found");
         });
         route("GET", "repos/{owner}/{repo}/releases/{id}/assets", c -> {
             JSONObject r = releaseById(c, Long.parseLong(c.p("id")));
@@ -1216,6 +1253,12 @@ final class GitLabRoutes {
             }
         }
         return null;
+    }
+
+    private static JSONObject htmlRelease(Ctx c, JSONObject r) throws IOException {
+        JSONObject o = release(c, r);
+        GitLabHtml.attach(c, o, c.p("owner") + "/" + c.p("repo"));
+        return o;
     }
 
     static JSONObject release(Ctx c, JSONObject r) {

@@ -233,34 +233,34 @@
     <string name="event_create_repo_title">Created a repository</string>
     <string name="event_create_branch_title">Created branch [b]%1$s[/b] at [b]%2$s[/b]</string>
     <string name="event_create_tag_title">Created tag [b]%1$s[/b] at [b]%2$s[/b]</string>
-    <string name="event_issues_open_title">Opened issue [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_issues_close_title">Closed issue [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_issues_reopen_title">Reopened issue [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_issues_assign_title">Assigned issue [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_issues_unassign_title">Unassigned issue [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_issues_label_title">Added label [label] to issue [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_issues_unlabel_title">Removed label [label] from issue [b]%1$d[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_open_title">Opened issue [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_close_title">Closed issue [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_reopen_title">Reopened issue [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_assign_title">Assigned issue [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_unassign_title">Unassigned issue [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_label_title">Added label [label] to issue [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_issues_unlabel_title">Removed label [label] from issue [b]%1$s[/b] on [b]%2$s[/b]</string>
     <string name="event_delete_branch_title">Deleted branch [b]%1$s[/b] at [b]%2$s[/b]</string>
     <string name="event_delete_tag_title">Deleted tag [b]%1$s[/b] at [b]%2$s[/b]</string>
-    <string name="event_pr_open_title">Opened pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_close_title">Closed pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_merge_title">Pull request [b]%1$d[/b] on [b]%2$s was merged[/b]</string>
-    <string name="event_pr_reopen_title">Reopened pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_update_title">Updated pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_assign_title">Assigned pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_unassign_title">Unassigned pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_label_title">Added label [label] to pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pr_unlabel_title">Removed label [label] from pull request [b]%1$d[/b] on [b]%2$s[/b]</string>
-    <string name="event_pull_request_review_comment_title">Commented on pull request [b]%1$d[/b] in [b]%2$s[/b]</string>
+    <string name="event_pr_open_title">Opened pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_close_title">Closed pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_merge_title">Pull request [b]%1$s[/b] on [b]%2$s was merged[/b]</string>
+    <string name="event_pr_reopen_title">Reopened pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_update_title">Updated pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_assign_title">Assigned pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_unassign_title">Unassigned pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_label_title">Added label [label] to pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pr_unlabel_title">Removed label [label] from pull request [b]%1$s[/b] on [b]%2$s[/b]</string>
+    <string name="event_pull_request_review_comment_title">Commented on pull request [b]%1$s[/b] in [b]%2$s[/b]</string>
     <string name="event_member_title">Added [b]%1$s[/b] to [b]%2$s[/b]</string>
     <string name="event_download_title">Uploaded a file to [b]%1$s[/b]</string>
     <string name="event_gollum_title">Edited %1$s in the wiki at [b]%2$s[/b]</string>
     <string name="event_public_title">Open sourced [b]%1$s[/b]</string>
     <string name="event_release_title">Created a release in [b]%1$s[/b]</string>
-    <string name="event_issue_comment">Commented on issue [b]%1$d[/b] in [b]%2$s[/b]</string>
-    <string name="event_pull_request_comment">Commented on pull request [b]%1$d[/b] in [b]%2$s[/b]</string>
+    <string name="event_issue_comment">Commented on issue [b]%1$s[/b] in [b]%2$s[/b]</string>
+    <string name="event_pull_request_comment">Commented on pull request [b]%1$s[/b] in [b]%2$s[/b]</string>
     <string name="event_team_repo_add">Added the repository [b]%1$s[/b] to the team [b]%2$s[/b]</string>
-    <string name="event_review_title">Created a review on pull request [b]%1$d[/b] in [b]%2$s[/b]</string>
+    <string name="event_review_title">Created a review on pull request [b]%1$s[/b] in [b]%2$s[/b]</string>
 
     <string name="event_issue_assigned_desc">Issue is now assigned to [b]%1$s[/b]</string>
     <string name="event_issue_unassigned_desc">Issue is now unassigned</string>
@@ -302,7 +302,7 @@
     <string name="repo_files">Files</string>
     <string name="repo_short">Repos</string>
     <string name="repo_no_readme">No README file found</string>
-    <string name="repo_issue_on">#%1$d on %2$s/%3$s</string>
+    <string name="repo_issue_on">%1$s on %2$s/%3$s</string>
     <string name="repo_activity">Activity</string>
 
     <!-- Issue events -->
@@ -404,9 +404,9 @@
     <string name="issue_create">New Issue</string>
     <string name="issue_loading_template_hint">Loading issue body template\u2026</string>
     <string name="issue_error_title">Please enter a title</string>
-    <string name="issue_edit_title">Edit Issue #%1$d</string>
-    <string name="issue_error_close">Closing issue #%1$d failed</string>
-    <string name="issue_error_reopen">Reopening issue #%1$d failed</string>
+    <string name="issue_edit_title">Edit Issue %1$s</string>
+    <string name="issue_error_close">Closing issue %1$s failed</string>
+    <string name="issue_error_reopen">Reopening issue %1$s failed</string>
     <string name="issue_sort_order">Sort order</string>
     <string name="issue_sort_created_asc">Oldest</string>
     <string name="issue_sort_created_desc">Newest</string>
@@ -422,7 +422,7 @@
     <string name="issue_dialog_delete_message">Do you really want to delete %1$s?</string>
     <string name="issue_error_comment">Comment creation failed</string>
     <string name="issue_error_create">Issue creation failed</string>
-    <string name="issue_error_edit">Editing issue #%1$d failed</string>
+    <string name="issue_error_edit">Editing issue %1$s failed</string>
     <string name="issue_error_create_label">Creation of label \'%1$s\' failed</string>
     <string name="issue_error_edit_label">Editing label \'%1$s\' failed</string>
     <string name="issue_error_delete_label">Deletion of label \'%1$s\' failed</string>
@@ -472,7 +472,7 @@
 
     <!-- Pull Request -->
     <string name="pull_request_title">Pull Request</string>
-    <string name="review_title_format">Pull Request #%1$d - Review</string>
+    <string name="review_title_format">Pull Request %1$s - Review</string>
     <string name="pull_request_conversation">Conversation</string>
     <string name="pull_request_add_review">Reviews</string>
     <string name="pull_request_files">Files</string>
@@ -485,8 +485,8 @@
     <string name="pull_request_close">Close</string>
     <string name="pull_request_merge">Merge</string>
     <string name="pull_request_merged">Merged</string>
-    <string name="pull_error_merge">Merging pull request #%1$d failed</string>
-    <string name="pull_message_dialog_title">Merge pull request #%1$d</string>
+    <string name="pull_error_merge">Merging pull request %1$s failed</string>
+    <string name="pull_message_dialog_title">Merge pull request %1$s</string>
     <string name="pull_merge_title_description">Merge commit title</string>
     <string name="pull_merge_title_helper">Leave this empty to use the default title provided by GitLab.</string>
     <string name="pull_merge_message_description">Merge commit details</string>
@@ -509,10 +509,10 @@
     <string name="pull_request_to">Into [b][ref][/b]</string>
     <string name="close_pull_request_confirm">Do you really want to close this pull request?</string>
     <string name="reopen_pull_request_confirm">Do you really want to reopen this pull request?</string>
-    <string name="pull_request_edit_title">Edit Pull Request #%1$d</string>
+    <string name="pull_request_edit_title">Edit Pull Request %1$s</string>
     <string name="review_reply_hint">Reply to selected group</string>
     <string name="no_reply_group_selected_hint">Select group to reply to</string>
-    <string name="pull_request_review_dialog_title">Review pull request #%1$d</string>
+    <string name="pull_request_review_dialog_title">Review pull request %1$s</string>
     <string name="pull_request_review_event">Review type</string>
     <string name="pull_request_review_event_comment">Comment</string>
     <string name="pull_request_review_event_approve">Approve</string>
@@ -520,7 +520,7 @@
     <string name="pull_request_review_body">Review Summary</string>
     <string name="pull_request_review_description">Leave a comment about this review below.</string>
     <string name="pull_request_review_button_affirm">Comment</string>
-    <string name="pull_request_review_error">Adding review to pull request #%1$d failed</string>
+    <string name="pull_request_review_error">Adding review to pull request %1$s failed</string>
     <string name="pull_request_review_changes">Review</string>
     <string name="review_create_error">Review creation failed</string>
 
@@ -570,12 +570,12 @@
     <string name="share_title">Share via</string>
     <string name="share_file_subject">%1$s at %2$s</string>
     <string name="share_gist_subject">Gist %1$s by %2$s</string>
-    <string name="share_issue_subject">Issue # %1$d (%2$s) at %3$s</string>
-    <string name="share_pull_subject">Pull Request # %1$d (%2$s) at %3$s</string>
+    <string name="share_issue_subject">Issue %1$s (%2$s) at %3$s</string>
+    <string name="share_pull_subject">Pull Request %1$s (%2$s) at %3$s</string>
     <string name="share_commit_subject">Commit #%1$s at %2$s</string>
     <string name="share_user_subject">User %1$s (%2$s)</string>
     <string name="share_user_subject_loginonly">User %1$s</string>
-    <string name="share_comment_subject">Comment #%1$d in issue %2$d at %3$s</string>
+    <string name="share_comment_subject">Comment #%1$d in %2$s at %3$s</string>
     <string name="share_commit_comment_subject">Commit comment #%1$d at %2$s</string>
     <string name="share_line_subject">Line %1$d in file %2$s at %3$s</string>
 

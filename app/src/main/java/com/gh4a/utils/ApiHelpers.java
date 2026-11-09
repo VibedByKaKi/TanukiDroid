@@ -193,72 +193,75 @@ public class ApiHelpers {
         return user != null && user.equalsIgnoreCase(login);
     }
 
+    /**
+     * Turns a real GitLab web URL into the GitHub style URL that {@code LinkParser} understands.
+     * Other URLs are returned unchanged.
+     */
     public static Uri normalizeUri(Uri uri) {
         if (uri == null || uri.getAuthority() == null) {
             return uri;
         }
-
-        // GitHub api.* /api/v3, GitLab /api/v1, and GitLab HTML URLs on the active instance
-        String pathIn = uri.getPath() != null ? uri.getPath() : "";
-        boolean gitlabApi = pathIn.contains("/api/v1/");
-        boolean githubApi = pathIn.contains("/api/v3/") || uri.getAuthority().contains("api.");
-        String instanceHost = activeInstanceHost();
-        boolean activeInstance = instanceHost != null
-                && instanceHost.equalsIgnoreCase(uri.getHost());
-
-        if (!gitlabApi && !githubApi && !activeInstance) {
+        String host = uri.getHost();
+        if (GitLabUrls.SYNTHETIC_HOST.equals(host) || !isKnownInstanceHost(host)) {
             return uri;
         }
-
-        String path = pathIn;
-        String authority = uri.getAuthority();
-
-        if (gitlabApi || githubApi) {
-            path = path
-                    .replace("/api/v1/", "/")
-                    .replace("/api/v3/", "/")
-                    .replace("repos/", "")
-                    .replace("commits/", "commit/")
-                    .replace("pulls/", "pull/");
-            authority = authority.replace("api.", "");
-        }
-
-        // LinkParser only accepts github.com. Map the active GitLab host onto that synthetic
-        // authority, and rewrite GitLab's /pulls/N HTML paths to GitHub's /pull/N.
-        if (activeInstance) {
-            authority = "github.com";
-            path = path.replaceAll("/pulls/(\\d+)(/|$)", "/pull/$1$2");
-            // GitLab source URLs are /src/branch|tag|commit/<ref>/<path>; GitHub uses /blob/.
-            path = path.replaceAll("/src/(branch|tag|commit)/", "/blob/");
-        }
-
-        return uri.buildUpon()
-                .path(path)
-                .authority(authority)
-                .build();
+        Uri synthetic = GitLabUrls.toSynthetic(uri);
+        return synthetic != null ? synthetic : uri;
     }
 
-    /** Host for web links: the active GitLab instance, or github.com when none is set. */
-    public static String webAuthority() {
-        String host = activeInstanceHost();
-        return host != null ? host : "github.com";
+    private static boolean isKnownInstanceHost(String host) {
+        if (host == null) {
+            return false;
+        }
+        if (host.equalsIgnoreCase(activeInstanceHost())) {
+            return true;
+        }
+        for (String preset : KNOWN_HOSTS) {
+            if (preset.equalsIgnoreCase(host)) {
+                return true;
+            }
+        }
+        try {
+            Gh4Application app = Gh4Application.get();
+            if (app != null) {
+                for (String key : app.getAccounts().keySet()) {
+                    String instance = app.getInstanceUrl(key);
+                    if (instance != null && host.equalsIgnoreCase(Uri.parse(instance).getHost())) {
+                        return true;
+                    }
+                }
+            }
+        } catch (RuntimeException ignored) {
+            // not yet initialised
+        }
+        return false;
     }
 
+    private static final String[] KNOWN_HOSTS = {
+            "gitlab.com", "gitlab.gnome.org", "invent.kde.org", "salsa.debian.org",
+            "gitlab.freedesktop.org", "gitgud.io", "framagit.org", "jihulab.com",
+            "gitlab.alpinelinux.org",
+    };
+
+    /** Base URL of the active GitLab instance, or null when there is none. */
     @Nullable
-    private static String activeInstanceHost() {
+    public static String activeInstanceUrl() {
         try {
             Gh4Application app = Gh4Application.get();
             if (app == null) {
                 return null;
             }
-            String instanceUrl = app.getAuthInstanceUrl();
-            if (TextUtils.isEmpty(instanceUrl)) {
-                return null;
-            }
-            return Uri.parse(instanceUrl).getHost();
+            String url = app.getAuthInstanceUrl();
+            return TextUtils.isEmpty(url) ? null : url;
         } catch (RuntimeException ignored) {
             return null;
         }
+    }
+
+    @Nullable
+    private static String activeInstanceHost() {
+        String url = activeInstanceUrl();
+        return url != null ? Uri.parse(url).getHost() : null;
     }
 
     public static Pair<String, String> extractRepoOwnerAndNameFromIssue(Issue issue) {

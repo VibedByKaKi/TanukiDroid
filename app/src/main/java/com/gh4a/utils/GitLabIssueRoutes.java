@@ -71,6 +71,10 @@ final class GitLabIssueRoutes {
 
     // ---------------------------------------------------------------- helpers
 
+    static String projectPath(Ctx c) {
+        return c.p("owner") + "/" + c.p("repo");
+    }
+
     static long number(Ctx c) {
         String n = c.raw("number") != null ? c.raw("number") : c.raw("issue_number");
         return Long.parseLong(n);
@@ -80,6 +84,49 @@ final class GitLabIssueRoutes {
     static String target(Ctx c, long number) {
         return "/projects/" + c.project() + (isMr(number) ? "/merge_requests/" : "/issues/")
                 + GitLabMapper.iid(number);
+    }
+
+    private static final Map<String, JSONArray> LABELS = new HashMap<>();
+    private static final Map<String, Long> LABELS_TIME = new HashMap<>();
+
+    private static JSONArray projectLabels(Ctx c) throws IOException {
+        String key = c.instance() + "|" + c.project();
+        Long at = LABELS_TIME.get(key);
+        if (at != null && System.currentTimeMillis() - at < 15_000) {
+            return LABELS.get(key);
+        }
+        Up up = c.get("/projects/" + c.project() + "/labels", "per_page", "100",
+                "include_ancestor_groups", "true");
+        JSONArray a = up.ok() ? up.arr() : new JSONArray();
+        LABELS.put(key, a);
+        LABELS_TIME.put(key, System.currentTimeMillis());
+        return a;
+    }
+
+    /** Single issue and merge request answers only carry label names; add colours. */
+    static void fixLabels(Ctx c, JSONObject o) throws IOException {
+        JSONArray labels = o.optJSONArray("labels");
+        if (labels == null || labels.length() == 0) {
+            return;
+        }
+        JSONArray known = projectLabels(c);
+        for (int i = 0; i < labels.length(); i++) {
+            JSONObject l = labels.optJSONObject(i);
+            if (l == null || !"428bca".equals(l.optString("color"))) {
+                continue;
+            }
+            for (int k = 0; k < known.length(); k++) {
+                JSONObject kl = known.optJSONObject(k);
+                if (kl.optString("name").equals(l.optString("name"))) {
+                    GitLabMapper.setAt(labels, i, GitLabMapper.label(kl));
+                    break;
+                }
+            }
+        }
+    }
+
+    static void invalidateLabels(Ctx c) {
+        LABELS_TIME.remove(c.instance() + "|" + c.project());
     }
 
     static JSONObject enrichRepository(Ctx c, JSONObject issue, long projectId)
@@ -239,13 +286,22 @@ final class GitLabIssueRoutes {
             JSONObject mapped = isMr(n) ? GitLabMapper.mrAsIssue(i, c.instance())
                     : GitLabMapper.issue(i, c.project());
             enrichIssueExtras(c, n, mapped);
+            fixLabels(c, mapped);
+            put(mapped, "reactions", GitLabReactions.load(c, isMr(n), GitLabMapper.iid(n))
+                    .description.toJson());
+            GitLabHtml.attach(c, mapped, projectPath(c));
             return c.json(mapped);
         });
         route("POST", "repos/{owner}/{repo}/issues", c -> {
             JSONObject in = c.bodyJson();
             JSONObject body = issueBody(c, in, true);
             Up up = c.call("POST", "/projects/" + c.project() + "/issues", body);
-            return up.ok() ? c.json(GitLabMapper.issue(up.obj(), c.project())) : c.error(up);
+            if (!up.ok()) {
+                return c.error(up);
+            }
+            JSONObject created = GitLabMapper.issue(up.obj(), c.project());
+            fixLabels(c, created);
+            return c.json(created);
         });
         route("PATCH", "repos/{owner}/{repo}/issues/{number}", c -> {
             long n = number(c);
@@ -254,8 +310,10 @@ final class GitLabIssueRoutes {
             if (!up.ok()) {
                 return c.error(up);
             }
-            return c.json(isMr(n) ? GitLabMapper.mrAsIssue(up.obj(), c.instance())
-                    : GitLabMapper.issue(up.obj(), c.project()));
+            JSONObject edited = isMr(n) ? GitLabMapper.mrAsIssue(up.obj(), c.instance())
+                    : GitLabMapper.issue(up.obj(), c.project());
+            fixLabels(c, edited);
+            return c.json(edited);
         });
         route("PUT", "repos/{owner}/{repo}/issues/{number}/lock", c -> {
             JSONObject body = newObj();
@@ -583,6 +641,8 @@ final class GitLabIssueRoutes {
             if (!up.ok()) {
                 return c.error(up);
             }
+            GitLabReactions.Result reactions = GitLabReactions.load(c, isMr(n),
+                    GitLabMapper.iid(n));
             JSONArray in = up.arr();
             JSONArray out = new JSONArray();
             for (int i = 0; i < in.length(); i++) {
@@ -591,8 +651,11 @@ final class GitLabIssueRoutes {
                     continue;
                 }
                 remember(c, note.optLong("id"), isMr(n), GitLabMapper.iid(n), null);
-                out.put(GitLabMapper.note(note, str(note, "web_url")));
+                JSONObject mappedNote = GitLabMapper.note(note, str(note, "web_url"));
+                applyReactions(mappedNote, reactions, note.optLong("id"));
+                out.put(mappedNote);
             }
+            GitLabHtml.attach(c, out, projectPath(c));
             return c.jsonPaged(out, up);
         });
         route("POST", "repos/{owner}/{repo}/issues/{number}/comments", c -> {
@@ -604,7 +667,9 @@ final class GitLabIssueRoutes {
                 return c.error(up);
             }
             remember(c, up.obj().optLong("id"), isMr(n), GitLabMapper.iid(n), null);
-            return c.json(GitLabMapper.note(up.obj(), null));
+            JSONObject created = GitLabMapper.note(up.obj(), null);
+            GitLabHtml.attach(c, created, projectPath(c));
+            return c.json(created);
         });
         route("GET", "repos/{owner}/{repo}/issues/comments", c -> c.json(new JSONArray()));
         route("GET", "repos/{owner}/{repo}/issues/comments/{id}", c -> {
@@ -613,10 +678,22 @@ final class GitLabIssueRoutes {
                 return c.notFound("Comment not found");
             }
             Up up = c.get(notePath(c, ref, Long.parseLong(c.p("id"))));
-            return up.ok() ? c.json(GitLabMapper.note(up.obj(), null)) : c.error(up);
+            if (!up.ok()) {
+                return c.error(up);
+            }
+            JSONObject single = GitLabMapper.note(up.obj(), null);
+            GitLabHtml.attach(c, single, projectPath(c));
+            return c.json(single);
         });
         route("PATCH", "repos/{owner}/{repo}/issues/comments/{id}", c -> editNote(c));
         route("DELETE", "repos/{owner}/{repo}/issues/comments/{id}", c -> deleteNote(c));
+    }
+
+    static void applyReactions(JSONObject o, GitLabReactions.Result reactions, long noteId) {
+        GitLabReactions.Counts counts = reactions.notes.get(noteId);
+        if (counts != null) {
+            put(o, "reactions", counts.toJson());
+        }
     }
 
     static String notePath(Ctx c, NoteRef ref, long noteId) {
@@ -633,7 +710,12 @@ final class GitLabIssueRoutes {
         JSONObject body = newObj();
         put(body, "body", str(c.bodyJson(), "body"));
         Up up = c.call("PUT", notePath(c, ref, id), body);
-        return up.ok() ? c.json(GitLabMapper.note(up.obj(), null)) : c.error(up);
+        if (!up.ok()) {
+            return c.error(up);
+        }
+        JSONObject edited = GitLabMapper.note(up.obj(), null);
+        GitLabHtml.attach(c, edited, projectPath(c));
+        return c.json(edited);
     }
 
     static Response deleteNote(Ctx c) throws IOException {
@@ -666,6 +748,7 @@ final class GitLabIssueRoutes {
             return up.ok() ? c.json(GitLabMapper.label(up.obj())) : c.error(up);
         });
         route("POST", "repos/{owner}/{repo}/labels", c -> {
+            invalidateLabels(c);
             JSONObject in = c.bodyJson();
             JSONObject body = newObj();
             put(body, "name", str(in, "name"));
@@ -677,6 +760,7 @@ final class GitLabIssueRoutes {
             return up.ok() ? c.json(GitLabMapper.label(up.obj())) : c.error(up);
         });
         route("PATCH", "repos/{owner}/{repo}/labels/{name}", c -> {
+            invalidateLabels(c);
             JSONObject in = c.bodyJson();
             JSONObject body = newObj();
             if (in.has("name") && !in.isNull("name")) {
@@ -693,14 +777,20 @@ final class GitLabIssueRoutes {
             return up.ok() ? c.json(GitLabMapper.label(up.obj())) : c.error(up);
         });
         route("DELETE", "repos/{owner}/{repo}/labels/{name}", c -> {
+            invalidateLabels(c);
             Up up = c.call("DELETE", "/projects/" + c.project() + "/labels/"
                     + GitLabRoutes.enc(c.p("name")), null);
             return up.ok() ? c.empty(204) : c.error(up);
         });
         route("GET", "repos/{owner}/{repo}/issues/{number}/labels", c -> {
             Up up = c.get(target(c, number(c)), "with_labels_details", "true");
-            return up.ok() ? c.json(GitLabMapper.labels(up.obj().optJSONArray("labels")))
-                    : c.error(up);
+            if (!up.ok()) {
+                return c.error(up);
+            }
+            JSONObject holder = newObj();
+            put(holder, "labels", GitLabMapper.labels(up.obj().optJSONArray("labels")));
+            fixLabels(c, holder);
+            return c.json(holder.optJSONArray("labels"));
         });
         route("POST", "repos/{owner}/{repo}/issues/{number}/labels", c -> {
             JSONArray names = labelNames(c);
@@ -736,8 +826,13 @@ final class GitLabIssueRoutes {
 
     private static Response updateLabels(Ctx c, JSONObject body) throws IOException {
         Up up = c.call("PUT", target(c, number(c)), body, "with_labels_details", "true");
-        return up.ok() ? c.json(GitLabMapper.labels(up.obj().optJSONArray("labels")))
-                : c.error(up);
+        if (!up.ok()) {
+            return c.error(up);
+        }
+        JSONObject holder = newObj();
+        put(holder, "labels", GitLabMapper.labels(up.obj().optJSONArray("labels")));
+        fixLabels(c, holder);
+        return c.json(holder.optJSONArray("labels"));
     }
 
     // ---------------------------------------------------------------- milestones
@@ -923,6 +1018,8 @@ final class GitLabIssueRoutes {
         JSONObject body = newObj();
         put(body, "name", reactionName(content));
         Up up = c.call("POST", path + "/award_emoji", body);
+        GitLabReactions.invalidate(c, path.contains("/merge_requests/"),
+                Long.parseLong(path.replaceAll(".*/(issues|merge_requests)/(\\d+).*", "$2")));
         if (!up.ok() && up.code == 404) {
             return c.error(up);
         }
@@ -942,6 +1039,8 @@ final class GitLabIssueRoutes {
 
     private static Response deleteReaction(Ctx c, String path) throws IOException {
         Up up = c.call("DELETE", path + "/award_emoji/" + c.p("id"), null);
+        GitLabReactions.invalidate(c, path.contains("/merge_requests/"),
+                Long.parseLong(path.replaceAll(".*/(issues|merge_requests)/(\\d+).*", "$2")));
         return up.ok() ? c.empty(204) : c.error(up);
     }
 
@@ -1070,10 +1169,20 @@ final class GitLabIssueRoutes {
             put(payload, "action", "closed".equals(action) ? "closed"
                     : "reopened".equals(action) ? "reopened" : "opened");
             put(payload, "issue", minimalIssue(web, iid, title, actor, false));
+        } else if ("MergeRequest".equals(targetType) && "approved".equals(action)) {
+            type = "PullRequestReviewEvent";
+            put(payload, "action", "created");
+            JSONObject review = newObj();
+            put(review, "id", e.optLong("id"));
+            put(review, "user", actor);
+            put(review, "state", "approved");
+            put(review, "body", "");
+            put(payload, "review", review);
+            put(payload, "pull_request", minimalIssue(web, iid, title, actor, true));
         } else if ("MergeRequest".equals(targetType)) {
             type = "PullRequestEvent";
             boolean merged = "accepted".equals(action);
-            put(payload, "action", merged || "closed".equals(action) ? "closed"
+            put(payload, "action", merged ? "merged" : "closed".equals(action) ? "closed"
                     : "reopened".equals(action) ? "reopened" : "opened");
             put(payload, "number", GitLabMapper.mrNumber(iid));
             JSONObject pr = minimalIssue(web, iid, title, actor, true);
@@ -1083,7 +1192,18 @@ final class GitLabIssueRoutes {
                 || "DiscussionNote".equals(targetType)) {
             String noteable = note != null ? str(note, "noteable_type") : null;
             long noteableIid = note != null ? note.optLong("noteable_iid") : iid;
-            if ("Commit".equals(noteable)) {
+            if ("MergeRequest".equals(noteable) && "DiffNote".equals(targetType)) {
+                type = "PullRequestReviewCommentEvent";
+                put(payload, "action", "created");
+                put(payload, "pull_request", minimalIssue(web, noteableIid, title, actor, true));
+                JSONObject comment = newObj();
+                put(comment, "id", note != null ? note.optLong("id") : e.optLong("target_id"));
+                put(comment, "body", note != null ? str(note, "body") : "");
+                put(comment, "user", actor);
+                put(comment, "html_url", web + "/-/merge_requests/" + noteableIid + "#note_"
+                        + (note != null ? note.optLong("id") : 0));
+                put(payload, "comment", comment);
+            } else if ("Commit".equals(noteable)) {
                 type = "CommitCommentEvent";
                 JSONObject comment = newObj();
                 put(comment, "body", note != null ? str(note, "body") : "");
@@ -1200,6 +1320,13 @@ final class GitLabIssueRoutes {
         addResourceEvents(c, base + "/resource_milestone_events", events, "milestone");
 
         Collections.sort(events, (a, b) -> str(a, "created_at").compareTo(str(b, "created_at")));
+        GitLabReactions.Result reactions = GitLabReactions.load(c, mr, GitLabMapper.iid(n));
+        for (JSONObject e : events) {
+            if ("commented".equals(str(e, "event"))) {
+                applyReactions(e, reactions, e.optLong("id"));
+            }
+        }
+        GitLabHtml.attach(c, events, projectPath(c));
         JSONArray out = new JSONArray();
         for (JSONObject e : events) {
             out.put(e);
@@ -1459,21 +1586,9 @@ final class GitLabIssueRoutes {
     private static void registerMisc() {
         route("POST", "markdown", c -> {
             JSONObject in = c.bodyJson();
-            JSONObject body = newObj();
-            put(body, "text", str(in, "text"));
-            put(body, "gfm", true);
-            String context = str(in, "context");
-            if (context != null) {
-                put(body, "project", context);
-            }
-            Up up = c.call("POST", "/markdown", body);
-            if (!up.ok()) {
-                return c.error(up);
-            }
-            String html = str(up.obj(), "html");
-            return c.raw(new Up(200, (html != null ? html : "").getBytes(
-                    java.nio.charset.StandardCharsets.UTF_8), up.headers),
-                    "text/html; charset=utf-8");
+            String html = GitLabHtml.render(c, str(in, "text"), str(in, "context"));
+            return c.raw(new Up(200, html.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    okhttp3.Headers.of()), "text/html; charset=utf-8");
         });
         route("GET", "gists", c -> c.json(new JSONArray()));
         route("GET", "gists/public", c -> c.json(new JSONArray()));

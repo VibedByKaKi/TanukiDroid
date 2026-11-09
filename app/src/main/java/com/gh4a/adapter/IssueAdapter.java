@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.R;
 import com.gh4a.activities.UserActivity;
 import com.gh4a.utils.ApiHelpers;
@@ -51,7 +52,7 @@ public class IssueAdapter extends RootAdapter<Issue, IssueAdapter.ViewHolder> {
         holder.ivGravatar.setTag(issue);
 
         holder.lvLabels.setLabels(issue.labels());
-        holder.tvNumber.setText("#" + issue.number());
+        holder.tvNumber.setText(GitLabUrls.formatNumber(issue.number()));
         holder.tvDesc.setText(issue.title());
         holder.tvCreator.setText(ApiHelpers.getUserLoginWithType(mContext, issue.user()));
         holder.tvTimestamp.setText(StringUtils.formatRelativeTime(mContext,

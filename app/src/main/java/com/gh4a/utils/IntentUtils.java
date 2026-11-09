@@ -43,7 +43,7 @@ import androidx.fragment.app.FragmentActivity;
 
 public class IntentUtils {
     private static final String EXTRA_NEW_TASK = "IntentUtils.new_task";
-    private static final String RAW_URL_FORMAT = "https://%s/%s/%s/raw/%s/%s";
+    private static final String RAW_URL_FORMAT = "%s/%s/%s/-/raw/%s/%s";
 
     private IntentUtils() {
     }
@@ -82,10 +82,16 @@ public class IntentUtils {
         launchBrowser(context, uri, 0);
     }
 
+    /** Turns the GitHub style URLs the app builds into real GitLab URLs for external use. */
+    public static Uri toExternalUri(Uri uri) {
+        return GitLabUrls.toWeb(uri, ApiHelpers.activeInstanceUrl());
+    }
+
     public static void launchBrowser(Context context, Uri uri, int flags) {
         if (uri == null) {
             return;
         }
+        uri = toExternalUri(uri);
         Intent intent = createBrowserIntent(context, uri);
         if (intent != null) {
             try {
@@ -118,6 +124,7 @@ public class IntentUtils {
     }
 
     public static Intent createViewerOrBrowserIntent(Context context, Uri uri, String mime) {
+        uri = toExternalUri(uri);
         final Uri dummyUri = buildDummyUri(uri);
         final Intent viewIntent = new Intent(Intent.ACTION_VIEW).setDataAndType(dummyUri, mime);
         final Intent resolvedViewIntent = createActivityChooserIntent(context, viewIntent, uri);
@@ -132,6 +139,7 @@ public class IntentUtils {
     }
 
     public static void openInCustomTabOrBrowser(Activity activity, Uri uri, int headerColor) {
+        uri = toExternalUri(uri);
         SharedPreferences prefs = activity.getSharedPreferences(SettingsFragment.PREF_NAME,
                 Context.MODE_PRIVATE);
         boolean customTabsEnabled = prefs.getBoolean(SettingsFragment.KEY_CUSTOM_TABS, true);
@@ -155,9 +163,10 @@ public class IntentUtils {
     }
 
     public static Uri.Builder createBaseUriForUser(String user) {
+        // GitHub style URL; toExternalUri() turns it into the real GitLab URL when it is opened.
         return new Uri.Builder()
                 .scheme("https")
-                .authority(ApiHelpers.webAuthority())
+                .authority(GitLabUrls.SYNTHETIC_HOST)
                 .appendPath(user);
     }
 
@@ -167,15 +176,18 @@ public class IntentUtils {
     }
 
     public static String createRawFileUrl(String repoOwner, String repoName, String ref, String path) {
-        return String.format(Locale.US, RAW_URL_FORMAT, ApiHelpers.webAuthority(), repoOwner, repoName,
-                ref, path);
+        String instance = ApiHelpers.activeInstanceUrl();
+        if (instance == null) {
+            instance = "https://gitlab.com";
+        }
+        return String.format(Locale.US, RAW_URL_FORMAT, instance, repoOwner, repoName, ref, path);
     }
 
     public static void share(Context context, String subject, Uri url) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, url.toString());
+        shareIntent.putExtra(Intent.EXTRA_TEXT, toExternalUri(url).toString());
         context.startActivity(
                 Intent.createChooser(shareIntent, context.getString(R.string.share_title)));
     }

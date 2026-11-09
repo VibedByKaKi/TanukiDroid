@@ -28,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.adapter.ItemsWithDescriptionAdapter;
 import com.gh4a.utils.ActivityResultHelpers;
 import com.google.android.material.appbar.AppBarLayout;
@@ -130,7 +131,7 @@ public class IssueActivity extends BaseActivity implements
 
     @NonNull
     protected String getActionBarTitle() {
-        return getString(R.string.issue) + " #" + mIssueNumber;
+        return getString(R.string.issue) + " " + GitLabUrls.formatNumber(mIssueNumber);
     }
 
     @Nullable
@@ -256,14 +257,14 @@ public class IssueActivity extends BaseActivity implements
                 return true;
             case R.id.share:
                 IntentUtils.share(this, getString(R.string.share_issue_subject,
-                        mIssueNumber, mIssue.title(), mRepoOwner + "/" + mRepoName),
+                        GitLabUrls.formatNumber(mIssueNumber), mIssue.title(), mRepoOwner + "/" + mRepoName),
                         Uri.parse(mIssue.htmlUrl()));
                 return true;
             case R.id.browser:
                 IntentUtils.launchBrowser(this, Uri.parse(mIssue.htmlUrl()));
                 return true;
             case R.id.copy_number:
-                IntentUtils.copyToClipboard(this, "Issue #" + mIssueNumber,
+                IntentUtils.copyToClipboard(this, "Issue " + GitLabUrls.formatNumber(mIssueNumber),
                         String.valueOf(mIssueNumber));
                 return true;
         }
@@ -324,7 +325,7 @@ public class IssueActivity extends BaseActivity implements
                 .state(IssueState.Open)
                 .build();
 
-        String failureMessage = getString(R.string.issue_error_reopen, mIssueNumber);
+        String failureMessage = getString(R.string.issue_error_reopen, GitLabUrls.formatNumber(mIssueNumber));
         service.editIssue(mRepoOwner, mRepoName, mIssueNumber, request)
                 .map(ApiHelpers::throwOnFailure)
                 .compose(RxUtils.wrapForBackgroundTask(this, R.string.opening_msg, failureMessage))
@@ -338,7 +339,7 @@ public class IssueActivity extends BaseActivity implements
                 .stateReason(reason)
                 .build();
 
-        String failureMessage = getString(R.string.issue_error_close, mIssueNumber);
+        String failureMessage = getString(R.string.issue_error_close, GitLabUrls.formatNumber(mIssueNumber));
         service.editIssue(mRepoOwner, mRepoName, mIssueNumber, request)
                 .map(ApiHelpers::throwOnFailure)
                 .compose(RxUtils.wrapForBackgroundTask(this, R.string.closing_msg, failureMessage))

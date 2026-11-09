@@ -231,9 +231,25 @@ public class ServiceFactory {
         int twentyMB = 20 * 1024 * 1024;
         sApiHttpClient = new OkHttpClient.Builder()
                 .cache(new Cache(new File(context.getCacheDir(), "api-http"), twentyMB))
+                // GitLab needs several seconds for some writes (merging, forking).
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(90, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
         sImageHttpClient = sApiHttpClient.newBuilder()
                 .cache(new Cache(new File(context.getCacheDir(), "image-http"), twentyMB))
+                // Images of private projects need the token, but only on the instance's own host.
+                .addInterceptor(chain -> {
+                    Request request = chain.request();
+                    String instance = Gh4Application.get().getAuthInstanceUrl();
+                    String token = Gh4Application.get().getAuthToken();
+                    if (token != null && instance != null && request.header("PRIVATE-TOKEN") == null
+                            && request.url().host().equalsIgnoreCase(
+                                    android.net.Uri.parse(instance).getHost())) {
+                        request = request.newBuilder().header("PRIVATE-TOKEN", token).build();
+                    }
+                    return chain.proceed(request);
+                })
                 .build();
     }
 }

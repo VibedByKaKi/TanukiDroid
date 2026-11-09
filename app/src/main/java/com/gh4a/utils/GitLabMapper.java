@@ -47,6 +47,14 @@ final class GitLabMapper {
         }
     }
 
+    static void setAt(JSONArray a, int index, Object value) {
+        try {
+            a.put(index, value);
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     static JSONObject newObj() {
         return new JSONObject();
     }
@@ -339,10 +347,14 @@ final class GitLabMapper {
         return o;
     }
 
+    /** The SDK requires every reaction counter to be present. */
     static JSONObject reactionCounts(JSONObject i) {
         JSONObject r = newObj();
         put(r, "+1", i.optInt("upvotes"));
         put(r, "-1", i.optInt("downvotes"));
+        for (String k : new String[] {"laugh", "hooray", "confused", "heart", "rocket", "eyes"}) {
+            put(r, k, 0);
+        }
         return r;
     }
 
@@ -506,6 +518,7 @@ final class GitLabMapper {
         put(o, "updated_at", time(str(n, "updated_at")));
         put(o, "html_url", webBase != null ? webBase + "#note_" + n.optLong("id") : null);
         put(o, "author_association", "NONE");
+        put(o, "reactions", reactionCounts(newObj()));
         return o;
     }
 

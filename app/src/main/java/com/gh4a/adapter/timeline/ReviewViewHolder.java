@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.R;
 import com.gh4a.activities.ReviewActivity;
 import com.gh4a.activities.UserActivity;
@@ -285,7 +286,7 @@ class ReviewViewHolder
 
         switch (item.getItemId()) {
             case R.id.share:
-                IntentUtils.share(mContext, "Pull Request #" + mIssueNumber + " - Review",
+                IntentUtils.share(mContext, "Pull Request " + GitLabUrls.formatNumber(mIssueNumber) + " - Review",
                         Uri.parse(review.htmlUrl()));
                 return true;
 

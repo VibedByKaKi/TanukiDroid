@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.R;
 import com.gh4a.ServiceFactory;
 import com.gh4a.utils.ApiHelpers;
@@ -88,7 +89,7 @@ public class CreateReviewActivity extends AppCompatActivity implements
         mReviewEventSpinner.setAdapter(mReviewEventAdapter);
 
         TextView titleView = header.findViewById(R.id.review_dialog_title);
-        titleView.setText(getString(R.string.pull_request_review_dialog_title, mPullRequestNumber));
+        titleView.setText(getString(R.string.pull_request_review_dialog_title, GitLabUrls.formatNumber(mPullRequestNumber)));
 
         mEditorSheet.setCallback(this);
         if (mPendingReview != null && savedInstanceState == null) {

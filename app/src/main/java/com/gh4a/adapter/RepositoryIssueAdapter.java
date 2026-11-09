@@ -19,6 +19,7 @@ import android.content.Context;
 
 import android.util.Pair;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.R;
 import com.gh4a.utils.ApiHelpers;
 import com.meisolsson.githubsdk.model.Issue;
@@ -34,6 +35,6 @@ public class RepositoryIssueAdapter extends IssueAdapter {
 
         Pair<String, String> repo = ApiHelpers.extractRepoOwnerAndNameFromIssue(issue);
         holder.tvNumber.setText(mContext.getString(R.string.repo_issue_on,
-                issue.number(), repo.first, repo.second));
+                GitLabUrls.formatNumber(issue.number()), repo.first, repo.second));
     }
 }

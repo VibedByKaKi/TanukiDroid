@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.R;
 import com.gh4a.activities.CommitActivity;
 import com.gh4a.activities.IssueActivity;
@@ -328,8 +329,8 @@ class EventViewHolder
         String sourceRepoName = sourceRepoOwnerAndName.second;
         boolean isSourceInDifferentRepo = !mRepoOwner.equals(sourceRepoOwner) || !mRepoName.equals(sourceRepoName);
         String sourceLabel = isSourceInDifferentRepo
-                ? sourceRepoOwner + "/" + sourceRepoName + "#" + source.number()
-                : "#" + source.number();
+                ? sourceRepoOwner + "/" + sourceRepoName + GitLabUrls.formatNumber(source.number())
+                : GitLabUrls.formatNumber(source.number());
         text.replace(pos, pos + 8, sourceLabel);
         text.setSpan(new IntentSpan(mContext, context ->
                 source.pullRequest() != null

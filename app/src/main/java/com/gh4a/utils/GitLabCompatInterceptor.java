@@ -223,7 +223,11 @@ public class GitLabCompatInterceptor implements Interceptor {
             if (url.port() != HttpUrl.defaultPort(url.scheme())) {
                 b.port(url.port());
             }
-            b.encodedPath("/api/v4" + (glPath.startsWith("/") ? glPath : "/" + glPath));
+            if ("/graphql".equals(glPath)) {
+                b.encodedPath("/api/graphql");
+            } else {
+                b.encodedPath("/api/v4" + (glPath.startsWith("/") ? glPath : "/" + glPath));
+            }
             return b;
         }
 
@@ -334,7 +338,15 @@ public class GitLabCompatInterceptor implements Interceptor {
                 o.put("message", message);
             } catch (JSONException ignored) {
             }
-            return reply(up.code, o.toString());
+            int code = up.code;
+            String auth = up.headers.get("WWW-Authenticate");
+            if (code == 401 && request.header("PRIVATE-TOKEN") != null
+                    && (auth == null || !auth.contains("invalid_token"))) {
+                // GitLab answers 401 when a valid token lacks the right for an action. The app
+                // treats 401 as "log in again", so report it as the 403 it really is.
+                code = 403;
+            }
+            return reply(code, o.toString());
         }
 
         Response notFound(String message) {

@@ -86,6 +86,20 @@ final class GitLabPullRoutes {
             JSONObject pr = pullWithRepos(c, up.obj());
             Up commits = c.get(mr(c) + "/commits", "per_page", "1");
             put(pr, "commits", commits.total() >= 0 ? commits.total() : commits.arr().length());
+            Up diffs = c.get(mr(c) + "/diffs", "per_page", "100");
+            int additions = 0;
+            int deletions = 0;
+            JSONArray da = diffs.arr();
+            for (int i = 0; i < da.length(); i++) {
+                JSONObject f = GitLabMapper.diffFile(da.optJSONObject(i), c.instance(), "", null);
+                additions += f.optInt("additions");
+                deletions += f.optInt("deletions");
+            }
+            put(pr, "additions", additions);
+            put(pr, "deletions", deletions);
+            GitLabIssueRoutes.fixLabels(c, pr);
+            put(pr, "reactions", GitLabReactions.load(c, true, iid(number(c))).description.toJson());
+            GitLabHtml.attach(c, pr, c.p("owner") + "/" + c.p("repo"));
             return c.json(pr);
         });
         route("POST", "repos/{owner}/{repo}/pulls", c -> {
@@ -177,6 +191,9 @@ final class GitLabPullRoutes {
             String text = title != null && !title.isEmpty()
                     ? (message != null && !message.isEmpty() ? title + "\n\n" + message : title)
                     : message;
+            if (text != null && text.trim().isEmpty()) {
+                text = null;
+            }
             if ("rebase".equals(method)) {
                 Up rebase = c.call("PUT", mr(c) + "/rebase", null);
                 if (!rebase.ok()) {
@@ -362,6 +379,7 @@ final class GitLabPullRoutes {
                 return c.error(up);
             }
             long mrIid = iid(number(c));
+            GitLabReactions.Result reactions = GitLabReactions.load(c, true, mrIid);
             JSONArray in = up.arr();
             JSONArray out = new JSONArray();
             for (int i = 0; i < in.length(); i++) {
@@ -377,9 +395,12 @@ final class GitLabPullRoutes {
                 for (int k = 0; k < notes.length(); k++) {
                     JSONObject n = notes.optJSONObject(k);
                     GitLabIssueRoutes.remember(c, n.optLong("id"), true, mrIid, str(d, "id"));
-                    out.put(reviewComment(c, n, first, sha));
+                    JSONObject rc = reviewComment(c, n, first, sha);
+                    GitLabIssueRoutes.applyReactions(rc, reactions, n.optLong("id"));
+                    out.put(rc);
                 }
             }
+            GitLabHtml.attach(c, out, c.p("owner") + "/" + c.p("repo"));
             return c.jsonPaged(out, up);
         });
         route("GET", "repos/{owner}/{repo}/pulls/comments", c -> c.json(new JSONArray()));

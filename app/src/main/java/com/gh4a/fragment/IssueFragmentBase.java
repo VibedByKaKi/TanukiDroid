@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.BaseActivity;
 import com.gh4a.Gh4Application;
 import com.gh4a.R;
@@ -598,7 +599,7 @@ public abstract class IssueFragmentBase extends ListDataBaseFragment<TimelineIte
 
     @Override
     public String getShareSubject(GitHubCommentBase comment) {
-        return getString(R.string.share_comment_subject, comment.id(), mIssue.number(),
+        return getString(R.string.share_comment_subject, comment.id(), GitLabUrls.formatNumber(mIssue.number()),
                 mRepoOwner + "/" + mRepoName);
     }
 

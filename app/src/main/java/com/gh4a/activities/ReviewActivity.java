@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.R;
 import com.gh4a.fragment.ReviewFragment;
 import com.gh4a.utils.IntentUtils;
@@ -37,7 +38,7 @@ public class ReviewActivity extends FragmentContainerActivity {
     @Nullable
     @Override
     protected String getActionBarTitle() {
-        mTitle = getString(R.string.review_title_format, mIssueNumber);
+        mTitle = getString(R.string.review_title_format, GitLabUrls.formatNumber(mIssueNumber));
         return mTitle;
     }
 

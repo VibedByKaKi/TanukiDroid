@@ -28,6 +28,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.adapter.ItemsWithDescriptionAdapter;
 import com.gh4a.utils.ActivityResultHelpers;
 import com.google.android.material.appbar.AppBarLayout;
@@ -265,8 +266,8 @@ public class IssueEditActivity extends BasePagerActivity implements
         return !isEditingExistingIssue()
                 ? getString(R.string.issue_create)
                 : isPullRequest
-                        ? getString(R.string.pull_request_edit_title, mEditIssue.number())
-                        : getString(R.string.issue_edit_title, mEditIssue.number());
+                        ? getString(R.string.pull_request_edit_title, GitLabUrls.formatNumber(mEditIssue.number()))
+                        : getString(R.string.issue_edit_title, GitLabUrls.formatNumber(mEditIssue.number()));
     }
 
     @Nullable
@@ -515,7 +516,7 @@ public class IssueEditActivity extends BasePagerActivity implements
 
         Integer issueNumber = mEditIssue.number();
         String errorMessage = issueNumber != null
-                ? getString(R.string.issue_error_edit, issueNumber)
+                ? getString(R.string.issue_error_edit, GitLabUrls.formatNumber(issueNumber))
                 : getString(R.string.issue_error_create);
 
         IssueService service = ServiceFactory.get(IssueService.class, false);

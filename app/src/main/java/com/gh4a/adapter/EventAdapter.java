@@ -35,6 +35,7 @@ import android.widget.TextView;
 import com.gh4a.R;
 import com.gh4a.activities.UserActivity;
 import com.gh4a.utils.ApiHelpers;
+import com.gh4a.utils.GitLabUrls;
 import com.gh4a.utils.AvatarHandler;
 import com.gh4a.utils.StringUtils;
 import com.gh4a.widget.EllipsizeLineSpan;
@@ -431,7 +432,7 @@ public class EventAdapter extends RootAdapter<GitHubEvent, EventAdapter.EventVie
                 if (issue != null) {
                     int formatResId = issue.pullRequest() != null
                             ? R.string.event_pull_request_comment : R.string.event_issue_comment;
-                    return res.getString(formatResId, issue.number(),
+                    return res.getString(formatResId, GitLabUrls.formatNumberCompact(issue.number()),
                             formatFromRepoIdentifier(eventRepo));
                 }
                 break;
@@ -450,7 +451,7 @@ public class EventAdapter extends RootAdapter<GitHubEvent, EventAdapter.EventVie
                     case Unassigned: resId = R.string.event_issues_unassign_title; break;
                     default: return "";
                 }
-                return res.getString(resId, payload.issue().number(),
+                return res.getString(resId, GitLabUrls.formatNumberCompact(payload.issue().number()),
                         formatFromRepoIdentifier(eventRepo));
             }
 
@@ -500,7 +501,8 @@ public class EventAdapter extends RootAdapter<GitHubEvent, EventAdapter.EventVie
                     default:
                         return "";
                 }
-                return res.getString(resId, payload.number(), formatFromRepoIdentifier(eventRepo));
+                return res.getString(resId, GitLabUrls.formatNumberCompact(payload.number()),
+                        formatFromRepoIdentifier(eventRepo));
             }
 
             case PullRequestReviewEvent: {
@@ -508,7 +510,7 @@ public class EventAdapter extends RootAdapter<GitHubEvent, EventAdapter.EventVie
                 PullRequest pr = payload.pullRequest();
 
                 // assuming action is 'created' for now
-                return res.getString(R.string.event_review_title, pr.number(),
+                return res.getString(R.string.event_review_title, GitLabUrls.formatNumberCompact(pr.number()),
                         formatFromRepoIdentifier(eventRepo));
             }
 
@@ -519,7 +521,8 @@ public class EventAdapter extends RootAdapter<GitHubEvent, EventAdapter.EventVie
                 ReviewComment comment = payload.comment();
                 if (pr != null) {
                     return res.getString(R.string.event_pull_request_review_comment_title,
-                            pr.number(), formatFromRepoIdentifier(eventRepo));
+                            GitLabUrls.formatNumberCompact(pr.number()),
+                            formatFromRepoIdentifier(eventRepo));
                 } else if (comment != null) {
                     return res.getString(R.string.event_commit_comment_title,
                             comment.commitId().substring(0, 7),
