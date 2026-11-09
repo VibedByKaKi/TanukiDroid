@@ -1,9 +1,11 @@
 package com.gh4a;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.gh4a.utils.ApiHelpers;
+import com.gh4a.utils.GitLabCompatInterceptor;
 import com.meisolsson.githubsdk.core.ByteArrayResponseConverterFactory;
 import com.meisolsson.githubsdk.core.GitHubPaginationInterceptor;
 import com.meisolsson.githubsdk.core.ServiceGenerator;
@@ -16,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
-import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,9 +28,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class ServiceFactory {
-    private static final String DEFAULT_HEADER_ACCEPT = "application/vnd.github.v3+json," +
-            "application/vnd.github.v3.raw+json," +
-            "application/vnd.github.v3.html+json";
+    private static final String DEFAULT_HEADER_ACCEPT = "application/json";
 
     private final static HttpLoggingInterceptor LOGGING_INTERCEPTOR = new HttpLoggingInterceptor()
             .setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -116,11 +115,11 @@ public class ServiceFactory {
     private final static HashMap<String, Object> sCache = new HashMap<>();
 
     public static <S> S get(Class<S> serviceClass, boolean bypassCache) {
-        return get(serviceClass, bypassCache, null, null, null);
+        return get(serviceClass, bypassCache, null, null, null, null);
     }
 
     public static <S> S get(Class<S> serviceClass, boolean bypassCache, Integer pageSize) {
-        return get(serviceClass, bypassCache, null, null, pageSize);
+        return get(serviceClass, bypassCache, null, null, pageSize, null);
     }
 
     public static <S> S getForFullPagedLists(Class<S> serviceClass, boolean bypassCache) {
@@ -129,25 +128,46 @@ public class ServiceFactory {
 
     public static <S> S get(Class<S> serviceClass, boolean bypassCache, String acceptHeader,
             String token, Integer pageSize) {
-        String key = makeKey(serviceClass, bypassCache, acceptHeader, token, pageSize);
+        return get(serviceClass, bypassCache, acceptHeader, token, pageSize, null);
+    }
+
+    public static <S> S get(Class<S> serviceClass, boolean bypassCache, String acceptHeader,
+            String token, Integer pageSize, String instanceBaseUrl) {
+        String resolvedInstance = resolveInstanceBaseUrl(instanceBaseUrl);
+        String key = makeKey(serviceClass, bypassCache, acceptHeader, token, pageSize, resolvedInstance);
         S service = (S) sCache.get(key);
         if (service == null) {
-            service = createService(serviceClass, bypassCache, acceptHeader, token, pageSize);
+            service = createService(serviceClass, bypassCache, acceptHeader, token, pageSize,
+                    resolvedInstance);
             sCache.put(key, service);
         }
         return service;
     }
 
+    private static String resolveInstanceBaseUrl(String instanceBaseUrl) {
+        if (!TextUtils.isEmpty(instanceBaseUrl)) {
+            return Gh4Application.normalizeInstanceUrl(instanceBaseUrl);
+        }
+        String fromAccount = Gh4Application.get().getAuthInstanceUrl();
+        if (!TextUtils.isEmpty(fromAccount)) {
+            return fromAccount;
+        }
+        // Fallback for unauthenticated explore before any account exists
+        return "https://gitlab.com";
+    }
+
     private static String makeKey(Class<?> serviceClass, boolean bypassCache,
-            String acceptHeader, String token, Integer pageSize) {
-        return String.format(Locale.US, "%s-%d-%s-%s-%d",
+            String acceptHeader, String token, Integer pageSize, String instanceBaseUrl) {
+        return String.format(Locale.US, "%s-%d-%s-%s-%d-%s",
                 serviceClass.getSimpleName(), bypassCache ? 1 : 0,
                 acceptHeader != null ? acceptHeader : "",
-                token != null ? token : "", pageSize != null ? pageSize : 0);
+                token != null ? token : "", pageSize != null ? pageSize : 0,
+                instanceBaseUrl != null ? instanceBaseUrl : "");
     }
 
     private static <S> S createService(Class<S> serviceClass, final boolean bypassCache,
-            final String acceptHeader, final String token, final Integer pageSize) {
+            final String acceptHeader, final String token, final Integer pageSize,
+            final String instanceBaseUrl) {
         OkHttpClient.Builder clientBuilder = sApiHttpClient.newBuilder()
                 .addInterceptor(PAGINATION_INTERCEPTOR)
                 .addNetworkInterceptor(ETAG_WORKAROUND_INTERCEPTOR)
@@ -161,10 +181,7 @@ public class ServiceFactory {
                     String tokenToUse = token != null
                             ? token : Gh4Application.get().getAuthToken();
                     if (tokenToUse != null) {
-                        requestBuilder.header("Authorization", "Token " + tokenToUse);
-                    } else {
-                        requestBuilder.header("Authorization",
-                                Credentials.basic(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET));
+                        requestBuilder.header("PRIVATE-TOKEN", tokenToUse);
                     }
                     if (pageSize != null && original.url().queryParameterNames().contains("page")) {
                         requestBuilder.url(original.url().newBuilder()
@@ -192,8 +209,11 @@ public class ServiceFactory {
             clientBuilder.addInterceptor(CACHE_BYPASS_INTERCEPTOR);
         }
 
+        // Translate the GitHub-shaped SDK requests into GitLab API v4 calls and back.
+        clientBuilder.addInterceptor(new GitLabCompatInterceptor());
+
         Retrofit retrofit = RETROFIT_BUILDER
-                .baseUrl("https://api.github.com")
+                .baseUrl(instanceBaseUrl + "/")
                 .client(clientBuilder.build())
                 .build();
         return retrofit.create(serviceClass);

@@ -30,7 +30,6 @@ import com.gh4a.BaseFragmentPagerActivity;
 import com.gh4a.Gh4Application;
 import com.gh4a.R;
 import com.gh4a.ServiceFactory;
-import com.gh4a.activities.Github4AndroidActivity;
 import com.gh4a.activities.UserActivity;
 import com.gh4a.fragment.LoginModeChooserFragment;
 import com.gh4a.fragment.NotificationListFragment;
@@ -40,6 +39,7 @@ import com.gh4a.utils.ActivityResultHelpers;
 import com.gh4a.utils.ApiHelpers;
 import com.gh4a.utils.AvatarHandler;
 import com.gh4a.utils.UiUtils;
+import com.google.android.material.navigation.NavigationView;
 import com.meisolsson.githubsdk.model.User;
 import com.meisolsson.githubsdk.service.activity.NotificationService;
 import com.meisolsson.githubsdk.service.users.UserService;
@@ -273,7 +273,7 @@ public class HomeActivity extends BaseFragmentPagerActivity implements
 
         int accountCount = Gh4Application.get().getAccounts().size();
         if (id >= OTHER_ACCOUNTS_GROUP_BASE_ID && id < OTHER_ACCOUNTS_GROUP_BASE_ID + accountCount) {
-            switchActiveUser(item.getTitle().toString());
+            switchActiveAccount(item.getTitle().toString());
             return true;
         }
 
@@ -288,9 +288,9 @@ public class HomeActivity extends BaseFragmentPagerActivity implements
         }
     }
 
-    private void switchActiveUser(String login) {
-        Gh4Application.get().setActiveLogin(login);
-        mUserLogin = login;
+    private void switchActiveAccount(String accountKey) {
+        Gh4Application.get().setActiveLogin(accountKey);
+        mUserLogin = Gh4Application.get().getAuthLogin();
         onRefresh();
         closeDrawers();
         switchTo(mSelectedFactoryId, getFactoryForItem(mSelectedFactoryId));
@@ -351,19 +351,20 @@ public class HomeActivity extends BaseFragmentPagerActivity implements
     }
 
     @Override
-    public void onLoginStartOauth() {
-        Github4AndroidActivity.launchOauthLogin(this);
-    }
-
-    @Override
-    public void onLoginFinished(String token, User user) {
-        Gh4Application.get().addAccount(user, token);
-        switchActiveUser(user.login());
+    public void onLoginFinished(String token, User user, String instanceBaseUrl) {
+        Gh4Application.get().addAccount(user, token, instanceBaseUrl);
+        switchActiveAccount(Gh4Application.makeAccountKey(user.login(), instanceBaseUrl));
     }
 
     @Override
     public void onLoginFailed(Throwable error) {
-        // TODO
+        android.util.Log.e("Login", "Adding account failed", error);
+        String message = error.getMessage() != null ? error.getMessage() : error.toString();
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.add_account)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     @Override
@@ -501,39 +502,60 @@ public class HomeActivity extends BaseFragmentPagerActivity implements
     }
 
     private void updateDrawerMode(boolean accountMode) {
-        mLeftDrawerMenu.setGroupVisible(R.id.my_items, !accountMode);
-        mLeftDrawerMenu.setGroupVisible(R.id.navigation, !accountMode);
-        mLeftDrawerMenu.setGroupVisible(R.id.explore, !accountMode);
-        mLeftDrawerMenu.setGroupVisible(R.id.settings, !accountMode);
-        mLeftDrawerMenu.setGroupVisible(R.id.account, accountMode);
-        mLeftDrawerMenu.setGroupVisible(R.id.other_accounts, accountMode);
+        // Material NavigationView crashes (IndexOutOfBounds in
+        // NavigationMenuAdapter.getItemViewType) when TalkBack / UiAutomator
+        // prefetches a11y nodes while menu groups are being shown/hidden.
+        // Hide the drawer from a11y for the duration of the mutation.
+        final NavigationView leftDrawer = findViewById(R.id.left_drawer);
+        final int previousA11y = leftDrawer != null
+                ? leftDrawer.getImportantForAccessibility()
+                : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
+        if (leftDrawer != null) {
+            leftDrawer.setImportantForAccessibility(
+                    View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+        }
+        try {
+            mLeftDrawerMenu.setGroupVisible(R.id.my_items, !accountMode);
+            mLeftDrawerMenu.setGroupVisible(R.id.navigation, !accountMode);
+            mLeftDrawerMenu.setGroupVisible(R.id.explore, !accountMode);
+            mLeftDrawerMenu.setGroupVisible(R.id.settings, !accountMode);
+            mLeftDrawerMenu.setGroupVisible(R.id.account, accountMode);
+            mLeftDrawerMenu.setGroupVisible(R.id.other_accounts, accountMode);
 
-        if (accountMode) {
-            // repopulate other account list
-            for (int i = 0; ; i++) {
-                MenuItem item = mLeftDrawerMenu.findItem(OTHER_ACCOUNTS_GROUP_BASE_ID + i);
-                if (item == null) {
-                    break;
+            if (accountMode) {
+                // repopulate other account list
+                for (int i = 0; ; i++) {
+                    MenuItem item = mLeftDrawerMenu.findItem(OTHER_ACCOUNTS_GROUP_BASE_ID + i);
+                    if (item == null) {
+                        break;
+                    }
+                    mLeftDrawerMenu.removeItem(item.getItemId());
                 }
-                mLeftDrawerMenu.removeItem(item.getItemId());
+
+                int id = OTHER_ACCOUNTS_GROUP_BASE_ID;
+                java.util.Map<String, Long> accounts = Gh4Application.get().getAccounts();
+                String activeKey = Gh4Application.get().getAuthAccountKey();
+                for (java.util.Map.Entry<String, Long> entry : accounts.entrySet()) {
+                    String accountKey = entry.getKey();
+                    if (TextUtils.equals(activeKey, accountKey)) {
+                        continue;
+                    }
+
+                    MenuItem item = mLeftDrawerMenu.add(R.id.other_accounts, id++, Menu.NONE, accountKey);
+                    AvatarHandler.assignAvatar(this, item,
+                            Gh4Application.extractLoginName(accountKey), entry.getValue(),
+                            Gh4Application.get().getAccountAvatarUrl(accountKey));
+                }
             }
 
-            int id = OTHER_ACCOUNTS_GROUP_BASE_ID;
-            LongSparseArray<String> accounts = Gh4Application.get().getAccounts();
-            for (int i = 0; i < accounts.size(); i++) {
-                String login = accounts.valueAt(i);
-                if (ApiHelpers.loginEquals(mUserLogin, login)) {
-                    continue;
-                }
-
-                MenuItem item = mLeftDrawerMenu.add(R.id.other_accounts, id++, Menu.NONE, login);
-                AvatarHandler.assignAvatar(this, item, login, accounts.keyAt(i));
+            mDrawerSwitcher.setImageResource(accountMode
+                    ? R.drawable.drop_up_arrow_white : R.drawable.drop_down_arrow_white);
+            mDrawerInAccountMode = accountMode;
+        } finally {
+            if (leftDrawer != null) {
+                leftDrawer.post(() -> leftDrawer.setImportantForAccessibility(previousA11y));
             }
         }
-
-        mDrawerSwitcher.setImageResource(accountMode
-                ? R.drawable.drop_up_arrow_white : R.drawable.drop_down_arrow_white);
-        mDrawerInAccountMode = accountMode;
     }
 
     private void switchTo(int itemId, FragmentFactory factory) {

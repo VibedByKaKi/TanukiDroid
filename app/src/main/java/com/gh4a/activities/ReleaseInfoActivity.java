@@ -261,7 +261,8 @@ public class ReleaseInfoActivity extends BaseActivity implements
 
     @Override
     public boolean canAddReaction() {
-        return Gh4Application.get().isAuthorized() && mRelease != null && !mRelease.draft();
+        // GitLab releases have no reactions.
+        return false;
     }
 
     @Override

@@ -44,6 +44,19 @@ import retrofit2.Response;
 public class ApiHelpers {
     public static final int MAX_PAGE_SIZE = 100;
 
+    /** GitLab often omit GitHub Boolean fields → null; avoid unboxing NPEs. */
+    public static boolean isTrue(@Nullable Boolean value) {
+        return Boolean.TRUE.equals(value);
+    }
+
+    public static int nullToZero(@Nullable Integer value) {
+        return value != null ? value : 0;
+    }
+
+    public static int nullToZero(@Nullable Long value) {
+        return value != null ? value.intValue() : 0;
+    }
+
     public interface IssueState {
         String OPEN = "open";
         String CLOSED = "closed";
@@ -185,19 +198,39 @@ public class ApiHelpers {
             return uri;
         }
 
-        // Only normalize API links
-        if (!uri.getPath().contains("/api/v3/") && !uri.getAuthority().contains("api.")) {
+        // GitHub api.* /api/v3, GitLab /api/v1, and GitLab HTML URLs on the active instance
+        String pathIn = uri.getPath() != null ? uri.getPath() : "";
+        boolean gitlabApi = pathIn.contains("/api/v1/");
+        boolean githubApi = pathIn.contains("/api/v3/") || uri.getAuthority().contains("api.");
+        String instanceHost = activeInstanceHost();
+        boolean activeInstance = instanceHost != null
+                && instanceHost.equalsIgnoreCase(uri.getHost());
+
+        if (!gitlabApi && !githubApi && !activeInstance) {
             return uri;
         }
 
-        String path = uri.getPath()
-                .replace("/api/v3/", "/")
-                .replace("repos/", "")
-                .replace("commits/", "commit/")
-                .replace("pulls/", "pull/");
+        String path = pathIn;
+        String authority = uri.getAuthority();
 
-        String authority = uri.getAuthority()
-                .replace("api.", "");
+        if (gitlabApi || githubApi) {
+            path = path
+                    .replace("/api/v1/", "/")
+                    .replace("/api/v3/", "/")
+                    .replace("repos/", "")
+                    .replace("commits/", "commit/")
+                    .replace("pulls/", "pull/");
+            authority = authority.replace("api.", "");
+        }
+
+        // LinkParser only accepts github.com. Map the active GitLab host onto that synthetic
+        // authority, and rewrite GitLab's /pulls/N HTML paths to GitHub's /pull/N.
+        if (activeInstance) {
+            authority = "github.com";
+            path = path.replaceAll("/pulls/(\\d+)(/|$)", "/pull/$1$2");
+            // GitLab source URLs are /src/branch|tag|commit/<ref>/<path>; GitHub uses /blob/.
+            path = path.replaceAll("/src/(branch|tag|commit)/", "/blob/");
+        }
 
         return uri.buildUpon()
                 .path(path)
@@ -205,14 +238,56 @@ public class ApiHelpers {
                 .build();
     }
 
+    /** Host for web links: the active GitLab instance, or github.com when none is set. */
+    public static String webAuthority() {
+        String host = activeInstanceHost();
+        return host != null ? host : "github.com";
+    }
+
+    @Nullable
+    private static String activeInstanceHost() {
+        try {
+            Gh4Application app = Gh4Application.get();
+            if (app == null) {
+                return null;
+            }
+            String instanceUrl = app.getAuthInstanceUrl();
+            if (TextUtils.isEmpty(instanceUrl)) {
+                return null;
+            }
+            return Uri.parse(instanceUrl).getHost();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
     public static Pair<String, String> extractRepoOwnerAndNameFromIssue(Issue issue) {
         Repository repo = issue.repository();
-        if (repo != null) {
+        if (repo != null && !TextUtils.isEmpty(repo.fullName())) {
             String[] splitted = repo.fullName().split("/");
-            return Pair.create(splitted[0], splitted[1]);
+            if (splitted.length >= 2) {
+                return Pair.create(splitted[0], splitted[1]);
+            }
         }
-        String[] urlParts = issue.url().split("/");
-        return Pair.create(urlParts[4], urlParts[5]);
+        return extractRepoOwnerAndNameFromUrl(issue.url());
+    }
+
+    /**
+     * Parse owner/repo from a GitHub or GitLab API URL.
+     * GitHub: {@code https://api.github.com/repos/OWNER/REPO/...}
+     * GitLab: {@code https://host/api/v1/repos/OWNER/REPO/...}
+     */
+    public static Pair<String, String> extractRepoOwnerAndNameFromUrl(String url) {
+        if (TextUtils.isEmpty(url)) {
+            return Pair.create(null, null);
+        }
+        String[] parts = url.split("/");
+        for (int i = 0; i < parts.length - 2; i++) {
+            if ("repos".equals(parts[i])) {
+                return Pair.create(parts[i + 1], parts[i + 2]);
+            }
+        }
+        return Pair.create(null, null);
     }
 
     private final static char[] HEX_CHARS = "0123456789abcdef".toCharArray();

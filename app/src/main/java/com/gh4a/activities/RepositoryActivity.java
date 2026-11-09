@@ -267,6 +267,8 @@ public class RepositoryActivity extends BaseFragmentPagerActivity implements
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        // GitLab has no code search API.
+        menu.removeItem(R.id.search);
         if (mRepository == null) {
             menu.removeItem(R.id.ref);
             menu.removeItem(R.id.bookmark);
@@ -321,13 +323,14 @@ public class RepositoryActivity extends BaseFragmentPagerActivity implements
                 }
                 return true;
             case R.id.zip_download: {
+                // GitLab serves archives at /archive/{ref}.zip and needs the token header.
                 final String zipUrl = Uri.parse(mRepository.url())
                         .buildUpon()
-                        .appendPath("zipball")
-                        .appendPath(getCurrentRef())
+                        .appendPath("archive")
+                        .appendPath(getCurrentRef() + ".zip")
                         .toString();
-                DownloadUtils.enqueueDownloadWithPermissionCheck(this, zipUrl, "application/zip",
-                        mRepoName + "-" + getCurrentRef() + ".zip", null);
+                DownloadUtils.enqueueAuthenticatedDownloadWithPermissionCheck(this, zipUrl,
+                        "application/zip", mRepoName + "-" + getCurrentRef() + ".zip");
                 return true;
             }
         }
@@ -431,10 +434,13 @@ public class RepositoryActivity extends BaseFragmentPagerActivity implements
 
             for (int i = 0; i < count; i++) {
                 Branch item = adapter.getItem(i);
-                if (item.name().equals(selectedRef) || item.commit().sha().equals(selectedRef)) {
+                String name = item.name();
+                String sha = item.commit() != null ? item.commit().sha() : null;
+                if ((name != null && name.equals(selectedRef))
+                        || (sha != null && sha.equals(selectedRef))) {
                     current = i;
                 }
-                if (item.name().equals(defaultBranch)) {
+                if (name != null && name.equals(defaultBranch)) {
                     master = i;
                 }
             }

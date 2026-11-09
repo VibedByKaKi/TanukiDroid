@@ -238,8 +238,9 @@ public class FileViewerActivity extends WebViewerActivity
                 IntentUtils.launchBrowser(this, url);
                 return true;
             case R.id.download:
-                DownloadUtils.enqueueDownloadWithPermissionCheck(this, buildRawFileUrl(),
-                        FileUtils.getMimeTypeFor(mPath), FileUtils.getFileName(mPath), null);
+                DownloadUtils.enqueueAuthenticatedDownloadWithPermissionCheck(this,
+                        buildRawFileUrl(), FileUtils.getMimeTypeFor(mPath),
+                        FileUtils.getFileName(mPath));
                 return true;
             case R.id.share:
                 IntentUtils.share(this, getString(R.string.share_file_subject,
@@ -368,7 +369,10 @@ public class FileViewerActivity extends WebViewerActivity
                         // When file size is >1 and <100 MB, the GH API endpoint returns a successful response
                         // but does not include the file contents in the response payload.
                         // See https://docs.github.com/en/rest/repos/contents#get-repository-content
-                        boolean fileContentIsMissing = mContent.size() > 0 && Objects.equals(mContent.content(), "");
+                        // A GitLab directory URL returns a listing without size or content.
+                        boolean notAFile = mContent.size() == null || mContent.content() == null;
+                        boolean fileContentIsMissing = notAFile
+                                || (mContent.size() > 0 && Objects.equals(mContent.content(), ""));
                         if (fileContentIsMissing) {
                             openUnsuitableFileAndFinish();
                         } else {

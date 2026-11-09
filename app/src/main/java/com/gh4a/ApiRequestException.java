@@ -17,17 +17,26 @@ public class ApiRequestException extends RuntimeException {
 
     private final ClientErrorResponse mResponse;
     private final int mStatus;
+    private final String mRequest;
 
     public ApiRequestException(Response response) {
         mStatus = response.code();
+        String request = null;
+        try {
+            request = response.raw().request().method() + " " + response.raw().request().url();
+        } catch (RuntimeException ignored) {
+        }
+        mRequest = request;
 
         ClientErrorResponse error = null;
         try {
-            error = ServiceGenerator.moshi
-                    .adapter(ClientErrorResponse.class)
-                    .fromJson(response.errorBody().source());
-        } catch (IOException e) {
-            // ignored
+            if (response.errorBody() != null) {
+                error = ServiceGenerator.moshi
+                        .adapter(ClientErrorResponse.class)
+                        .fromJson(response.errorBody().source());
+            }
+        } catch (IOException | RuntimeException e) {
+            // GitLab often returns plain text like "404 page not found" instead of JSON.
         }
         mResponse = error;
     }
@@ -42,6 +51,11 @@ public class ApiRequestException extends RuntimeException {
 
     @Override
     public String getMessage() {
+        String base = buildMessage();
+        return mRequest != null ? base + "\n" + mRequest : base;
+    }
+
+    private String buildMessage() {
         if (mResponse == null) {
             return super.getMessage();
         }

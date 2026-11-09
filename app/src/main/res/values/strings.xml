@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OctoDroid</string>
+    <string name="app_name">TanukiDroid</string>
 
     <!-- Common -->
-    <string name="introduction">To be able to use the app to its full potential, please log in to GitHub using the button below.\n\nAlternatively, you can explore some parts of GitHub using the swipe-out menu on the left.</string>
+    <string name="introduction">To be able to use the app to its full potential, please log in to a GitLab instance using the button below.\n\nAlternatively, you can explore some parts of GitLab using the swipe-out menu on the left.</string>
     <string name="repo_not_found_toast">Repository was not found</string>
     <string name="loading_msg">Loading\u2026</string>
     <string name="saving_msg">Saving\u2026</string>
@@ -17,12 +17,11 @@
     <string name="search_code">Search code</string>
     <string name="logout">Logout</string>
     <string name="login">Login</string>
-    <string name="login_oauth">Login via OAuth</string>
-    <string name="login_token">Login using access token</string>
-    <string name="login_summary_oauth">Log in to Github using the OAuth web login flow.\nAs the login process is done in your browser and only one account can be active at a time there, you need to make sure to be logged out from Github in your browser before being able to log in to a new account.\n\nPlease visit <a href="https://github.com/logout">Github\'s logout page</a>, finish the logout process, then close the browser window, come back to the app and continue the login process.\nIf you\'re sure you\'re not logged in, you can also continue to the login process right away.</string>
+    <string name="login_instance_label">GitLab instance</string>
+    <string name="login_custom_url_hint">Instance base URL (https://…)</string>
+    <string name="login_token_name_hint">API token name</string>
+    <string name="login_token_name_default">TanukiDroid</string>
     <string name="credentials_error_empty">This field must not be empty.</string>
-    <string name="credentials_error_invalid_token">The entered text does not look like a valid access token.</string>
-    <string name="credentials_token">Access token</string>
     <string name="try_again">Try again</string>
     <string name="report_issue">Report issue</string>
     <string name="ok">OK</string>
@@ -34,14 +33,14 @@
     <string name="my_profile">My profile</string>
     <string name="user_context">Account</string>
     <string name="add_account">Add account</string>
-    <string name="my_email">slapperwan@gmail.com</string>
-    <string name="my_web">http://slapperwan.github.com/gh4a</string>
-    <string name="my_username">slapperwan</string>
-    <string name="my_repo">gh4a</string>
+    <string name="my_web">https://github.com/VibedByKaKi/TanukiDroid</string>
+    <string name="my_issues_url">https://github.com/VibedByKaKi/TanukiDroid/issues</string>
+    <string name="my_username">VibedByKaKi</string>
+    <string name="my_repo">TanukiDroid</string>
     <string name="source_code">Source Code</string>
-    <string name="feedback_text">If you have any issues or suggestions, please contact me.  Any kind of feedback is greatly appreciated.</string>
-    <string name="feedback_by_email">By Email</string>
-    <string name="feedback_by_gh4a">By OctoDroid</string>
+    <string name="feedback_text">If you have any issues or suggestions, please open an issue on the project page. Any kind of feedback is greatly appreciated.</string>
+    <string name="feedback_by_gh4a">Report an issue</string>
+    <string name="upstream_credit">Based on <a href="https://github.com/slapperwan/gh4a">OctoDroid</a> by Azwan Adli, Danny Baumann and contributors.</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="bookmarks_and_stars">Bookmarks and Stars</string>
     <string name="other_info">Other Information</string>
@@ -64,10 +63,10 @@
     <string name="draft">Draft</string>
     <string name="theme">Theme</string>
     <string name="pub_timeline">Public Timeline</string>
-    <string name="load_failure_explanation">Loading the data from GitHub failed. Please verify you have a working network connection and try again.</string>
+    <string name="load_failure_explanation">Loading the data from GitLab failed. Please verify you have a working network connection and try again.</string>
     <string name="load_failure_explanation_dmca">This repository was taken down for legal reasons.\nPlease see %1$s for details.</string>
-    <string name="load_failure_explanation_parsing">There was an error while parsing GitHub\'s response. You can use the button below to report this issue to the app developers.</string>
-    <string name="load_failure_explanation_with_reason">Loading the data from GitHub failed. GitHub told us the following reason:\n%1$s</string>
+    <string name="load_failure_explanation_parsing">There was an error while parsing the server\'s response. You can use the button below to report this issue to the app developers.</string>
+    <string name="load_failure_explanation_with_reason">Loading the data from GitLab failed. The server told us the following reason:\n%1$s</string>
     <string name="snackbar_network_error">%1$s. Please check your internet connection.</string>
     <string name="snackbar_application_error">%1$s. You can copy the error log to provide more details when reporting the issue to the app developers.</string>
     <string name="snackbar_github_api_error">%1$s: %2$s</string>
@@ -120,7 +119,7 @@
     <string name="download_permission_rationale">Permission to write to USB storage or SD card is required in order to download files.</string>
     <string name="load_auth_failure_notice">Your authentication credentials aren\'t valid anymore, please log in again.</string>
     <string name="unset">Unset</string>
-    <string name="copyright_notice">\u00a9 2014 Azwan Adli, Danny Baumann</string>
+    <string name="copyright_notice">TanukiDroid — a GitLab client based on OctoDroid.\n\u00a9 2014 Azwan Adli, Danny Baumann and OctoDroid contributors.</string>
     <string name="actions">Actions</string>
     <string name="created">Created</string>
     <string name="assigned">Assigned</string>
@@ -489,7 +488,7 @@
     <string name="pull_error_merge">Merging pull request #%1$d failed</string>
     <string name="pull_message_dialog_title">Merge pull request #%1$d</string>
     <string name="pull_merge_title_description">Merge commit title</string>
-    <string name="pull_merge_title_helper">Leave this empty to use the default title provided by GitHub.</string>
+    <string name="pull_merge_title_helper">Leave this empty to use the default title provided by GitLab.</string>
     <string name="pull_merge_message_description">Merge commit details</string>
     <string name="pull_merge_status_loading">Loading pull request status…</string>
     <string name="pull_merge_status_behind">This branch is out-of-date with the base branch</string>

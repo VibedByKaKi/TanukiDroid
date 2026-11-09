@@ -126,9 +126,8 @@ public class CommitListFragment extends PagedDataBaseFragment<Commit> implements
 
     @Override
     public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        if (mFileType == ContentType.File || mFileType == ContentType.Submodule) {
-            inflater.inflate(R.menu.commit_history_menu, menu);
-        }
+        // GitLab's commits API cannot follow renames, so the toggle is not offered.
+
     }
 
     @Override
@@ -179,9 +178,10 @@ public class CommitListFragment extends PagedDataBaseFragment<Commit> implements
 
     @Override
     public void onItemClick(Commit commit) {
-        String[] urlPart = commit.url().split("/");
+        // Prefer fragment repo identity: GitLab commit URLs include /api/v1/... so
+        // splitting like GitHub (indices 4/5) yields owner="v1", repo="repos".
         Intent intent = CommitActivity.makeIntent(getActivity(),
-                urlPart[4], urlPart[5], commit.sha());
+                mRepoOwner, mRepoName, commit.sha());
         mCommitLauncher.launch(intent);
     }
 

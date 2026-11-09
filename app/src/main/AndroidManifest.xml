@@ -49,12 +49,6 @@
                 <category
                     android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <data android:scheme="gh4a" android:host="oauth" />
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-            </intent-filter>
         </activity>
 
         <activity-alias
@@ -159,22 +153,58 @@
                 <category
                     android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:host="github.com"
+                    android:host="gitlab.com"
                     android:scheme="https" />
                 <data
-                    android:host="gist.github.com"
+                    android:host="gitlab.gnome.org"
                     android:scheme="https" />
                 <data
-                    android:host="blog.github.com"
+                    android:host="invent.kde.org"
                     android:scheme="https" />
                 <data
-                    android:host="github.com"
+                    android:host="salsa.debian.org"
+                    android:scheme="https" />
+                <data
+                    android:host="gitlab.freedesktop.org"
+                    android:scheme="https" />
+                <data
+                    android:host="gitgud.io"
+                    android:scheme="https" />
+                <data
+                    android:host="framagit.org"
+                    android:scheme="https" />
+                <data
+                    android:host="jihulab.com"
+                    android:scheme="https" />
+                <data
+                    android:host="gitlab.alpinelinux.org"
+                    android:scheme="https" />
+                <data
+                    android:host="gitlab.com"
                     android:scheme="http" />
-				<data
-                    android:host="gist.github.com"
+                <data
+                    android:host="gitlab.gnome.org"
                     android:scheme="http" />
                 <data
-                    android:host="blog.github.com"
+                    android:host="invent.kde.org"
+                    android:scheme="http" />
+                <data
+                    android:host="salsa.debian.org"
+                    android:scheme="http" />
+                <data
+                    android:host="gitlab.freedesktop.org"
+                    android:scheme="http" />
+                <data
+                    android:host="gitgud.io"
+                    android:scheme="http" />
+                <data
+                    android:host="framagit.org"
+                    android:scheme="http" />
+                <data
+                    android:host="jihulab.com"
+                    android:scheme="http" />
+                <data
+                    android:host="gitlab.alpinelinux.org"
                     android:scheme="http" />
             </intent-filter>
         </activity>

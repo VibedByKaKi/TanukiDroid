@@ -17,6 +17,7 @@ package com.gh4a.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.annotation.PluralsRes;
 import androidx.core.content.ContextCompat;
 
@@ -76,6 +77,7 @@ public class UserFragment extends LoadingFragmentBase implements
     private static final int ID_LOADER_ORG_LIST = 1;
     private static final int ID_LOADER_IS_FOLLOWING = 2;
     private static final int ID_LOADER_ORG_MEMBER_COUNT = 3;
+    private static final int ID_LOADER_REPO_COUNT = 4;
 
     private User mUser;
     private View mContentView;
@@ -101,6 +103,7 @@ public class UserFragment extends LoadingFragmentBase implements
     public void onRefresh() {
         mIsFollowing = null;
         loadTopRepositories(true);
+        loadRepoCountIfNeeded(true);
         loadOrganizationsIfUser(true);
         loadOrganizationMemberCountIfOrg(true);
         loadIsFollowingStateIfNeeded(true);
@@ -112,6 +115,7 @@ public class UserFragment extends LoadingFragmentBase implements
 
         fillData();
         loadTopRepositories(false);
+        loadRepoCountIfNeeded(false);
         loadOrganizationsIfUser(false);
         loadOrganizationMemberCountIfOrg(false);
         loadIsFollowingStateIfNeeded(false);
@@ -126,7 +130,13 @@ public class UserFragment extends LoadingFragmentBase implements
         if (!Gh4Application.get().isAuthorized()) {
             return false;
         }
-        return mUser != null && mUser.type() == UserType.User;
+        return mUser != null && userType() == UserType.User;
+    }
+
+    /** GitLab omits GitHub's type field; treat missing as a normal user. */
+    private UserType userType() {
+        UserType type = mUser != null ? mUser.type() : null;
+        return type != null ? type : UserType.User;
     }
 
     private void fillData() {
@@ -145,19 +155,20 @@ public class UserFragment extends LoadingFragmentBase implements
         mFollowersRow = mContentView.findViewById(R.id.followers_row);
         OverviewRow followingRow = mContentView.findViewById(R.id.following_row);
         OverviewRow membersRow = mContentView.findViewById(R.id.members_row);
-        boolean isUser = mUser.type() == UserType.User;
+        boolean isUser = userType() == UserType.User;
 
         mFollowersRow.setVisibility(isUser ? View.VISIBLE : View.GONE);
         followingRow.setVisibility(isUser ? View.VISIBLE : View.GONE);
-        membersRow.setVisibility(mUser.type() == UserType.Organization ? View.VISIBLE : View.GONE);
+        membersRow.setVisibility(userType() == UserType.Organization ? View.VISIBLE : View.GONE);
 
         if (isUser) {
             mFollowersRow.setIconClickListener(canFollowUser() ? this : null);
             mFollowersRow.setClickIntent(FollowerFollowingListActivity.makeIntent(
                     getActivity(), mUser.login(), true));
 
+            int followingCount = orZero(mUser.following());
             followingRow.setText(getResources().getQuantityString(R.plurals.following,
-                    mUser.following(), mUser.following()));
+                    followingCount, followingCount));
             followingRow.setClickIntent(FollowerFollowingListActivity.makeIntent(
                     getActivity(), mUser.login(), false));
         } else {
@@ -166,20 +177,28 @@ public class UserFragment extends LoadingFragmentBase implements
         }
 
         OverviewRow gistsRow = mContentView.findViewById(R.id.gists_row);
-        gistsRow.setVisibility(isUser ? View.VISIBLE : View.GONE);
-        if (isUser) {
+        // GitLab has no gists API and omits gist counts; hide rather than show a fake 0.
+        boolean hasGistCounts = mUser.publicGists() != null || mUser.privateGists() != null;
+        gistsRow.setVisibility(isUser && hasGistCounts ? View.VISIBLE : View.GONE);
+        if (isUser && hasGistCounts) {
             int totalCount = orZero(mUser.publicGists()) + orZero(mUser.privateGists());
             gistsRow.setText(getResources().getQuantityString(R.plurals.gist, totalCount, totalCount));
             gistsRow.setClickIntent(GistListActivity.makeIntent(getActivity(), mUser.login()));
         }
 
         OverviewRow reposRow = mContentView.findViewById(R.id.repos_row);
-        int repoCount = orZero(mUser.totalPrivateRepos()) + orZero(mUser.publicRepos());
-        reposRow.setText(getResources().getQuantityString(R.plurals.repository, repoCount, repoCount));
+        Integer knownRepoCount = knownRepoCount();
+        if (knownRepoCount != null) {
+            reposRow.setText(getResources().getQuantityString(
+                    R.plurals.repository, knownRepoCount, knownRepoCount));
+        } else {
+            // GitLab user/org payloads omit public_repos; filled asynchronously.
+            reposRow.setText(getString(R.string.user_pub_repos));
+        }
         reposRow.setClickIntent(RepositoryListActivity.makeIntent(getActivity(), mUser.login(), !isUser));
 
         OverviewRow typeRow = mContentView.findViewById(R.id.type_row);
-        switch (mUser.type()) {
+        switch (userType()) {
             case User:
                 typeRow.setVisibility(View.GONE);
                 break;
@@ -192,6 +211,9 @@ public class UserFragment extends LoadingFragmentBase implements
                 typeRow.setText(getString(R.string.user_type_bot));
                 typeRow.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.icon_user_bot));
                 typeRow.setVisibility(View.VISIBLE);
+                break;
+            default:
+                typeRow.setVisibility(View.GONE);
                 break;
         }
 
@@ -216,7 +238,8 @@ public class UserFragment extends LoadingFragmentBase implements
     private void updateFollowingUi() {
         boolean following = mIsFollowing != null && mIsFollowing;
         @PluralsRes int resId = following ? R.plurals.follower_and_self : R.plurals.follower;
-        int count = following ? mUser.followers() - 1 : mUser.followers();
+        int followers = orZero(mUser.followers());
+        int count = following ? Math.max(followers - 1, 0) : followers;
         mFollowersRow.setText(getResources().getQuantityString(resId, count, count));
         mFollowersRow.setToggleState(following);
     }
@@ -238,7 +261,7 @@ public class UserFragment extends LoadingFragmentBase implements
 
         if (id == R.id.btn_repos) {
             intent = RepositoryListActivity.makeIntent(getActivity(), mUser.login(),
-                    mUser.type() == UserType.Organization);
+                    userType() == UserType.Organization);
         } else if (view.getTag() instanceof Repository) {
             intent = RepositoryActivity.makeIntent(getActivity(), (Repository) view.getTag());
         } else if (view.getTag() instanceof User) {
@@ -281,10 +304,10 @@ public class UserFragment extends LoadingFragmentBase implements
                 }
 
                 TextView tvForks = rowView.findViewById(R.id.tv_forks);
-                tvForks.setText(String.valueOf(repo.forksCount()));
+                tvForks.setText(String.valueOf(ApiHelpers.nullToZero(repo.forksCount())));
 
                 TextView tvStars = rowView.findViewById(R.id.tv_stars);
-                tvStars.setText(String.valueOf(repo.stargazersCount()));
+                tvStars.setText(String.valueOf(ApiHelpers.nullToZero(repo.stargazersCount())));
 
                 ll.addView(rowView);
             }
@@ -341,7 +364,7 @@ public class UserFragment extends LoadingFragmentBase implements
                     if (mUser != null && mIsFollowing != null) {
                         mIsFollowing = !mIsFollowing;
                         mUser = mUser.toBuilder()
-                                .followers(mUser.followers() + (mIsFollowing ? 1 : -1))
+                                .followers(orZero(mUser.followers()) + (mIsFollowing ? 1 : -1))
                                 .build();
                         updateFollowingUi();
                     }
@@ -349,6 +372,56 @@ public class UserFragment extends LoadingFragmentBase implements
                     handleActionFailure("Toggling following state failed", error);
                     updateFollowingUi();
                 });
+    }
+
+    @Nullable
+    private Integer knownRepoCount() {
+        Integer pub = mUser.publicRepos();
+        Integer priv = mUser.totalPrivateRepos();
+        if (pub == null && priv == null) {
+            return null;
+        }
+        return orZero(pub) + orZero(priv);
+    }
+
+    private void updateReposRow(int repoCount) {
+        OverviewRow reposRow = mContentView.findViewById(R.id.repos_row);
+        reposRow.setText(getResources().getQuantityString(
+                R.plurals.repository, repoCount, repoCount));
+    }
+
+    private void loadRepoCountIfNeeded(boolean force) {
+        if (knownRepoCount() != null) {
+            return;
+        }
+        // GitLab omits public_repos; use X-Total-Count from a 1-item repo page.
+        RepositoryService service = ServiceFactory.get(RepositoryService.class, force, 1);
+        Map<String, String> filterData = new HashMap<>();
+        filterData.put("sort", "pushed");
+        filterData.put("affiliation", "owner,collaborator");
+        final Single<Response<Page<Repository>>> observable;
+        if (mIsSelf) {
+            observable = service.getUserRepositories(filterData, 1);
+        } else if (userType() == UserType.Organization) {
+            observable = service.getOrganizationRepositories(mUser.login(), filterData, 1);
+        } else {
+            observable = service.getUserRepositories(mUser.login(), filterData, 1);
+        }
+        observable
+                .map(response -> {
+                    ApiHelpers.throwOnFailure(response);
+                    String totalHeader = response.headers().get("X-Total-Count");
+                    if (totalHeader != null) {
+                        try {
+                            return Integer.parseInt(totalHeader.trim());
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                    Page<Repository> page = response.body();
+                    return page != null && page.items() != null ? page.items().size() : 0;
+                })
+                .compose(makeLoaderSingle(ID_LOADER_REPO_COUNT, force))
+                .subscribe(this::updateReposRow, this::handleLoadFailure);
     }
 
     private void loadTopRepositories(boolean force) {
@@ -361,7 +434,7 @@ public class UserFragment extends LoadingFragmentBase implements
 
         if (mIsSelf) {
             observable = service.getUserRepositories(filterData, 1);
-        } else if (mUser.type() == UserType.Organization) {
+        } else if (userType() == UserType.Organization) {
             observable = service.getOrganizationRepositories(mUser.login(), filterData, 1);
         } else {
             observable = service.getUserRepositories(mUser.login(), filterData, 1);
@@ -378,7 +451,7 @@ public class UserFragment extends LoadingFragmentBase implements
     }
 
     private void loadOrganizationsIfUser(boolean force) {
-        if (mUser.type() != UserType.User) {
+        if (userType() != UserType.User) {
             fillOrganizations(null);
             return;
         }
@@ -394,7 +467,7 @@ public class UserFragment extends LoadingFragmentBase implements
     }
 
     private void loadOrganizationMemberCountIfOrg(boolean force) {
-        if (mUser.type() != UserType.Organization) {
+        if (userType() != UserType.Organization) {
             return;
         }
         final OrganizationMemberService service = ServiceFactory.get(OrganizationMemberService.class, force, 1);

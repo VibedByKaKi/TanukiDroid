@@ -237,7 +237,7 @@ public class RepositoryFragment extends LoadingFragmentBase implements
         final String name = mRepository.name();
 
         OverviewRow forkParentRow = mContentView.findViewById(R.id.fork_parent_row);
-        if (mRepository.isFork() && mRepository.parent() != null) {
+        if (ApiHelpers.isTrue(mRepository.isFork()) && mRepository.parent() != null) {
             Repository parent = mRepository.parent();
             forkParentRow.setVisibility(View.VISIBLE);
             forkParentRow.setText(getForkedFromTextWithHighlight(parent));
@@ -247,7 +247,7 @@ public class RepositoryFragment extends LoadingFragmentBase implements
         }
 
         OverviewRow privateRow = mContentView.findViewById(R.id.private_row);
-        privateRow.setVisibility(mRepository.isPrivate() ? View.VISIBLE : View.GONE);
+        privateRow.setVisibility(ApiHelpers.isTrue(mRepository.isPrivate()) ? View.VISIBLE : View.GONE);
 
         OverviewRow languageRow = mContentView.findViewById(R.id.language_row);
         languageRow.setVisibility(StringUtils.isBlank(mRepository.language())
@@ -261,15 +261,15 @@ public class RepositoryFragment extends LoadingFragmentBase implements
                 .setVisibility(showOverviewRowDivider ? View.VISIBLE : View.GONE);
 
         OverviewRow issuesRow = mContentView.findViewById(R.id.issues_row);
-        issuesRow.setVisibility(mRepository.hasIssues() ? View.VISIBLE : View.GONE);
+        issuesRow.setVisibility(ApiHelpers.isTrue(mRepository.hasIssues()) ? View.VISIBLE : View.GONE);
         issuesRow.setClickIntent(IssueListActivity.makeIntent(getActivity(), owner, name));
 
         OverviewRow pullsRow = mContentView.findViewById(R.id.pulls_row);
         pullsRow.setClickIntent(IssueListActivity.makeIntent(getActivity(), owner, name, true));
 
+        int forksCount = ApiHelpers.nullToZero(mRepository.forksCount());
         OverviewRow forksRow = mContentView.findViewById(R.id.forks_row);
-        forksRow.setText(getResources().getQuantityString(R.plurals.fork,
-                mRepository.forksCount(), mRepository.forksCount()));
+        forksRow.setText(getResources().getQuantityString(R.plurals.fork, forksCount, forksCount));
         forksRow.setClickIntent(ForkListActivity.makeIntent(getActivity(), owner, name));
 
         mStarsRow = mContentView.findViewById(R.id.stars_row);
@@ -290,9 +290,11 @@ public class RepositoryFragment extends LoadingFragmentBase implements
         mContentView.findViewById(R.id.tv_releases_label).setOnClickListener(this::onOtherInfoLabelClick);
 
         Permissions permissions = mRepository.permissions();
-        updateClickableLabel(R.id.tv_collaborators_label, permissions != null && permissions.push());
-        updateClickableLabel(R.id.tv_wiki_label, mRepository.hasWiki());
-        updateClickableLabel(R.id.tv_discussions_label, mRepository.hasDiscussions());
+        updateClickableLabel(R.id.tv_collaborators_label,
+                permissions != null && ApiHelpers.isTrue(permissions.push()));
+        // GitLab may omit GitHub-only fields (e.g. has_discussions) → null Booleans.
+        updateClickableLabel(R.id.tv_wiki_label, ApiHelpers.isTrue(mRepository.hasWiki()));
+        updateClickableLabel(R.id.tv_discussions_label, ApiHelpers.isTrue(mRepository.hasDiscussions()));
     }
 
     @NonNull
@@ -330,14 +332,14 @@ public class RepositoryFragment extends LoadingFragmentBase implements
     }
 
     private void updateStargazerUi() {
-        mStarsRow.setText(getResources().getQuantityString(R.plurals.star,
-                mRepository.stargazersCount(), mRepository.stargazersCount()));
+        int stars = ApiHelpers.nullToZero(mRepository.stargazersCount());
+        mStarsRow.setText(getResources().getQuantityString(R.plurals.star, stars, stars));
         mStarsRow.setToggleState(mIsStarring != null && mIsStarring);
     }
 
     private void updateWatcherUi() {
-        mWatcherRow.setText(getResources().getQuantityString(R.plurals.watcher,
-                mRepository.subscribersCount(), mRepository.subscribersCount()));
+        int watchers = ApiHelpers.nullToZero(mRepository.subscribersCount());
+        mWatcherRow.setText(getResources().getQuantityString(R.plurals.watcher, watchers, watchers));
         mWatcherRow.setToggleState(mIsWatching != null && mIsWatching);
     }
 
@@ -443,11 +445,13 @@ public class RepositoryFragment extends LoadingFragmentBase implements
 
         service.searchIssues(query, null, null, 0)
                 .map(ApiHelpers::throwOnFailure)
-                .map(SearchPage::totalCount)
+                .map(page -> ApiHelpers.nullToZero(page.totalCount()))
                 .compose(makeLoaderSingle(ID_LOADER_PULL_REQUEST_COUNT, force))
                 .subscribe(count -> {
-                    int totalCount = count.intValue();
-                    int issueCount = mRepository.openIssuesCount() - totalCount;
+                    int totalCount = ApiHelpers.nullToZero(count);
+                    // GitLab's open_issues_count is issues-only (unlike GitHub, which
+                    // includes PRs). Do not subtract PR count or the UI goes negative.
+                    int issueCount = ApiHelpers.nullToZero(mRepository.openIssuesCount());
 
                     OverviewRow issuesRow = mContentView.findViewById(R.id.issues_row);
                     issuesRow.setText(getResources().getQuantityString(R.plurals.issue, issueCount, issueCount));
@@ -468,7 +472,8 @@ public class RepositoryFragment extends LoadingFragmentBase implements
                     if (mIsStarring != null) {
                         mIsStarring = !mIsStarring;
                         mRepository = mRepository.toBuilder()
-                                .stargazersCount(mRepository.stargazersCount() + (mIsStarring ? 1 : -1))
+                                .stargazersCount(ApiHelpers.nullToZero(mRepository.stargazersCount())
+                                        + (mIsStarring ? 1 : -1))
                                 .build();
                         updateStargazerUi();
                     }
@@ -502,7 +507,8 @@ public class RepositoryFragment extends LoadingFragmentBase implements
                     if (mIsWatching != null) {
                         mIsWatching = result;
                         mRepository = mRepository.toBuilder()
-                                .subscribersCount(mRepository.subscribersCount() + (mIsWatching ? 1 : -1))
+                                .subscribersCount(ApiHelpers.nullToZero(mRepository.subscribersCount())
+                                        + (mIsWatching ? 1 : -1))
                                 .build();
                         updateWatcherUi();
                     }

@@ -17,6 +17,8 @@ package com.gh4a.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.text.TextUtils;
+
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pair;
@@ -290,14 +292,20 @@ public abstract class EventListFragment extends PagedDataBaseFragment<GitHubEven
                 List<GitCommit> commits = payload.commits();
 
                 if (commits != null && !commits.isEmpty()) {
-                    if (commits.size() > 1) {
+                    // GitLab activity feeds omit the previous SHA; compare with an empty
+                    // base yields an empty result, so fall back to the head commit.
+                    if (commits.size() > 1 && !TextUtils.isEmpty(payload.before())) {
                         // if commit > 1, then show compare activity
                         intent = CompareActivity.makeIntent(getActivity(), repoOwner, repoName,
                                 payload.before(), payload.head());
                     } else {
-                        // only 1 commit, then show the commit details
+                        // only 1 commit (or no usable base), then show the commit details
+                        String sha = commits.get(0).sha();
+                        if (TextUtils.isEmpty(sha)) {
+                            sha = payload.head();
+                        }
                         intent = CommitActivity.makeIntent(getActivity(),
-                                repoOwner, repoName, commits.get(0).sha());
+                                repoOwner, repoName, sha);
                     }
                 } else {
                     intent = RepositoryActivity.makeIntent(getActivity(), repoOwner, repoName);
@@ -308,9 +316,13 @@ public abstract class EventListFragment extends PagedDataBaseFragment<GitHubEven
             case ReleaseEvent: {
                 ReleasePayload payload = (ReleasePayload) event.payload();
                 Release release = payload.release();
-                if (release != null) {
+                if (release != null && release.id() != null) {
                     intent = ReleaseInfoActivity.makeIntent(getActivity(),
                             repoOwner, repoName, release.id());
+                } else if (release != null && release.tagName() != null) {
+                    // GitLab feed releases carry no id; open by tag.
+                    intent = ReleaseInfoActivity.makeIntent(getActivity(),
+                            repoOwner, repoName, release.tagName());
                 }
                 break;
             }
@@ -534,11 +546,16 @@ public abstract class EventListFragment extends PagedDataBaseFragment<GitHubEven
                     prSingles.put(new PrIdentifier(event.repo(), payload.number()), prSingle);
                 } else if (event.type() == GitHubEventType.PushEvent) {
                     PushPayload payload = (PushPayload) event.payload();
-                    Single<Response<CommitCompare>> pushSingle = commitService.compareCommits(
-                            repoOwnerAndName.first, repoOwnerAndName.second,
-                            payload.before(), payload.head());
-                    pushSingles.put(new PushIdentifier(event.repo(),
-                            payload.before(), payload.head()), pushSingle);
+                    // GitLab activity feeds often omit the previous SHA; GitHub compare
+                    // with an empty base returns 404, so skip enrichment in that case.
+                    if (!TextUtils.isEmpty(payload.before())
+                            && !TextUtils.isEmpty(payload.head())) {
+                        Single<Response<CommitCompare>> pushSingle = commitService.compareCommits(
+                                repoOwnerAndName.first, repoOwnerAndName.second,
+                                payload.before(), payload.head());
+                        pushSingles.put(new PushIdentifier(event.repo(),
+                                payload.before(), payload.head()), pushSingle);
+                    }
                 }
             }
 
