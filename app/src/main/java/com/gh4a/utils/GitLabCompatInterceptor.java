@@ -357,6 +357,9 @@ public class GitLabCompatInterceptor implements Interceptor {
         Response withPagination(Response r, Up up) {
             int next = up.nextPage();
             int totalPages = up.totalPages();
+            if (up.total() >= 0) {
+                r = r.newBuilder().header("X-Total-Count", String.valueOf(up.total())).build();
+            }
             if (next < 0 && totalPages < 0) {
                 return r;
             }

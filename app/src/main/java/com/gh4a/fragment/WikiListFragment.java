@@ -1,22 +1,32 @@
 package com.gh4a.fragment;
 
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gh4a.Gh4Application;
 import com.gh4a.R;
+import com.gh4a.ServiceFactory;
 import com.gh4a.activities.WikiActivity;
 import com.gh4a.adapter.CommonFeedAdapter;
 import com.gh4a.adapter.RootAdapter;
 import com.gh4a.model.Feed;
 import com.gh4a.utils.RxUtils;
-import com.gh4a.utils.SingleFactory;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.reactivex.Single;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class WikiListFragment extends ListDataBaseFragment<Feed> implements
         RootAdapter.OnItemClickListener<Feed> {
@@ -45,12 +55,54 @@ public class WikiListFragment extends ListDataBaseFragment<Feed> implements
 
     @Override
     protected Single<List<Feed>> onCreateDataSingle(boolean bypassCache) {
-        String relativeUrl = mUserLogin + "/" + mRepoName + "/wiki.atom";
-        final List<Feed> empty = new ArrayList<>();
-        return SingleFactory.loadFeed(relativeUrl)
-                // for empty repos, Github redirects to the repo's home page
-                .compose(RxUtils.mapFailureToValue(HttpURLConnection.HTTP_MOVED_TEMP, empty))
-                .compose(RxUtils.mapFailureToValue(HttpURLConnection.HTTP_NOT_FOUND, empty));
+        return Single.fromCallable(this::loadWikiPages)
+                .compose(RxUtils::doInBackground);
+    }
+
+    /** Wiki pages come from the GitLab API; there is no feed to read as on GitHub. */
+    private List<Feed> loadWikiPages() throws IOException, JSONException {
+        List<Feed> pages = new ArrayList<>();
+        String instance = Gh4Application.get().getAuthInstanceUrl();
+        String token = Gh4Application.get().getAuthToken();
+        if (instance == null) {
+            return pages;
+        }
+        String project = Uri.encode(mUserLogin + "/" + mRepoName);
+        OkHttpClient client = ServiceFactory.getHttpClientBuilder().build();
+        Request request = new Request.Builder()
+                .url(instance + "/api/v4/projects/" + project + "/wikis")
+                .header("PRIVATE-TOKEN", token != null ? token : "")
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (response.code() == HttpURLConnection.HTTP_NOT_FOUND
+                    || response.code() == HttpURLConnection.HTTP_FORBIDDEN) {
+                return pages;
+            }
+            if (!response.isSuccessful() || response.body() == null) {
+                throw new IOException("HTTP " + response.code());
+            }
+            JSONArray array = new JSONArray(response.body().string());
+            for (int i = 0; i < array.length() && i < 50; i++) {
+                JSONObject page = array.getJSONObject(i);
+                String slug = page.optString("slug");
+                // The list has no rendered HTML, a single page does.
+                Request detail = new Request.Builder()
+                        .url(instance + "/api/v4/projects/" + project + "/wikis/"
+                                + Uri.encode(slug) + "?render_html=1")
+                        .header("PRIVATE-TOKEN", token != null ? token : "")
+                        .build();
+                String html = page.optString("content");
+                try (Response rendered = client.newCall(detail).execute()) {
+                    if (rendered.isSuccessful() && rendered.body() != null) {
+                        html = new JSONObject(rendered.body().string()).optString("content", html)
+                                .replace("&#x000A;", "\n");
+                    }
+                }
+                pages.add(Feed.create(slug, page.optString("title", slug), html,
+                        instance + "/" + mUserLogin + "/" + mRepoName + "/-/wikis/" + slug));
+            }
+        }
+        return pages;
     }
 
     @Override

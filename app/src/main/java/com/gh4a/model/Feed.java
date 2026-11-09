@@ -67,6 +67,17 @@ public class Feed implements Parcelable {
     private int userId;
     private String preview;
 
+    /** Builds an entry without parsing XML (used for GitLab wiki pages). */
+    public static Feed create(String id, String title, String content, String link) {
+        Feed feed = new Feed();
+        feed.id = id;
+        feed.title = title;
+        feed.content = content;
+        feed.link = link;
+        feed.apply();
+        return feed;
+    }
+
     @Commit
     private void apply() {
         userId = determineUserId(avatarUrl, author);

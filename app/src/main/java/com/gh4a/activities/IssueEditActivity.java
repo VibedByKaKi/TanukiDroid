@@ -582,7 +582,8 @@ public class IssueEditActivity extends BasePagerActivity implements
                     .compose(RxUtils.wrapWithProgressDialog(this, R.string.loading_msg))
                     .map(assignees -> {
                         User creator = mEditIssue.user();
-                        if (creator != null && !assignees.contains(creator)) {
+                        if (creator != null && assignees.stream()
+                                .noneMatch(a -> ApiHelpers.loginEquals(a, creator.login()))) {
                             assignees.add(creator);
                         }
                         return assignees;
@@ -595,7 +596,7 @@ public class IssueEditActivity extends BasePagerActivity implements
     }
 
     private void loadIssueTemplates() {
-        registerTemporarySubscription(getIssueTemplatesSingle("/.github")
+        registerTemporarySubscription(getIssueTemplatesSingle("/.gitlab")
                 .flatMap(opt -> RxUtils.toSingleOrFallback(opt, () -> getIssueTemplatesSingle("")))
                 .flatMap(opt -> RxUtils.toSingleOrFallback(opt, () -> getIssueTemplatesSingle("/docs")))
                 .compose(RxUtils.wrapWithProgressDialog(this, R.string.loading_msg))
@@ -700,7 +701,14 @@ public class IssueEditActivity extends BasePagerActivity implements
         return service.getContentsRaw(mRepoOwner, mRepoName, content.path(), null)
             .map(ApiHelpers::throwOnFailure)
             .map(bytes -> new String(bytes))
-            .map(IssueTemplate::new)
+            .map(text -> {
+                IssueTemplate template = new IssueTemplate(text);
+                if (template.name == null) {
+                    // GitLab templates have no front matter, so use the file name.
+                    template.name = content.name().replaceFirst("\\.md$", "");
+                }
+                return template;
+            })
             .compose(RxUtils::doInBackground);
     }
 

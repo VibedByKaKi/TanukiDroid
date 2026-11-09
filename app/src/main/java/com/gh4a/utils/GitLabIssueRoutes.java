@@ -1475,20 +1475,31 @@ final class GitLabIssueRoutes {
 
     private static void registerNotifications() {
         route("GET", "notifications", c -> {
-            Up up = c.getPaged("/todos", "state", "all".equals(c.q("all")) || "true".equals(c.q("all"))
-                    ? "done" : "pending");
-            if ("true".equals(c.q("all"))) {
-                up = c.getPaged("/todos");
-            }
+            boolean all = "true".equals(c.q("all"));
+            Up up = c.getPaged("/todos", "state", "pending");
             if (!up.ok()) {
                 return c.error(up);
             }
+            List<JSONObject> todos = new ArrayList<>();
             JSONArray in = up.arr();
-            JSONArray out = new JSONArray();
             for (int i = 0; i < in.length(); i++) {
-                JSONObject t = todo(c, in.optJSONObject(i));
-                if (t != null) {
-                    out.put(t);
+                todos.add(in.optJSONObject(i));
+            }
+            if (all) {
+                Up done = c.getPaged("/todos", "state", "done");
+                JSONArray d = done.arr();
+                for (int i = 0; i < d.length(); i++) {
+                    todos.add(d.optJSONObject(i));
+                }
+                Collections.sort(todos, (x, y) -> str(y, "updated_at") != null
+                        ? str(y, "updated_at").compareTo(str(x, "updated_at") != null
+                        ? str(x, "updated_at") : "") : 0);
+            }
+            JSONArray out = new JSONArray();
+            for (JSONObject t : todos) {
+                JSONObject mapped = todo(c, t);
+                if (mapped != null) {
+                    out.put(mapped);
                 }
             }
             return c.jsonPaged(out, up);

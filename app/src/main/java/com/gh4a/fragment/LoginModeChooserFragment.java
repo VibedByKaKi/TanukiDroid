@@ -152,6 +152,8 @@ public class LoginModeChooserFragment extends DialogFragment {
 
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
+        // Start signed out, so that adding a second account does not reuse the first one's session.
+        cookieManager.removeAllCookies(null);
 
         WebSettings settings = mWebView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -447,6 +449,8 @@ public class LoginModeChooserFragment extends DialogFragment {
         if (!TextUtils.isEmpty(token)) {
             Log.i(TAG, "Token created, fetching user");
             mOnTokenPage = false;
+            // The token replaces the web session.
+            CookieManager.getInstance().removeAllCookies(null);
             finishWithToken(mCurrentInstanceUrl, token);
         } else if ("no_csrf".equals(error)) {
             // Landed on a page without a session (for example an interstitial); retry on login.

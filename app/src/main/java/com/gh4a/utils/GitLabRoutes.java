@@ -162,7 +162,15 @@ final class GitLabRoutes {
             if (!up.ok()) {
                 return c.error(up);
             }
-            return c.json(GitLabMapper.user(up.obj()));
+            JSONObject me = up.obj();
+            // /user lacks the follower counters that /users/:id has.
+            Up pub = c.get("/users/" + me.optLong("id"));
+            if (pub.ok()) {
+                JSONObject p = pub.obj();
+                put(me, "followers", p.optInt("followers"));
+                put(me, "following", p.optInt("following"));
+            }
+            return c.json(GitLabMapper.user(me));
         });
         route("GET", "users/{username}", c -> {
             String name = c.p("username");
