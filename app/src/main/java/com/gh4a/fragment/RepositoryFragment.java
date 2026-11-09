@@ -41,7 +41,6 @@ import com.gh4a.activities.ReleaseListActivity;
 import com.gh4a.activities.RepositoryActivity;
 import com.gh4a.activities.StargazerListActivity;
 import com.gh4a.activities.UserActivity;
-import com.gh4a.activities.WatcherListActivity;
 import com.gh4a.activities.WikiListActivity;
 import com.gh4a.utils.ApiHelpers;
 import com.gh4a.utils.HtmlUtils;
@@ -278,7 +277,6 @@ public class RepositoryFragment extends LoadingFragmentBase implements
 
         mWatcherRow = mContentView.findViewById(R.id.watchers_row);
         mWatcherRow.setIconClickListener(this);
-        mWatcherRow.setClickIntent(WatcherListActivity.makeIntent(getActivity(), owner, name));
 
         if (!Gh4Application.get().isAuthorized()) {
             updateWatcherUi();
@@ -338,8 +336,9 @@ public class RepositoryFragment extends LoadingFragmentBase implements
     }
 
     private void updateWatcherUi() {
-        int watchers = ApiHelpers.nullToZero(mRepository.subscribersCount());
-        mWatcherRow.setText(getResources().getQuantityString(R.plurals.watcher, watchers, watchers));
+        // GitLab has no watcher list, only the user's own notification setting.
+        mWatcherRow.setText(getString(mIsWatching != null && mIsWatching
+                ? R.string.watching_repo : R.string.not_watching_repo));
         mWatcherRow.setToggleState(mIsWatching != null && mIsWatching);
     }
 

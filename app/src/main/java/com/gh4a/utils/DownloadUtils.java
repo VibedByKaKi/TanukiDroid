@@ -84,8 +84,12 @@ public class DownloadUtils {
             request.addRequestHeader("Accept", mediaType);
         }
         final String token = Gh4Application.get().getAuthToken();
-        if (addAuthHeader && token != null) {
-            request.addRequestHeader("Authorization", "token " + token);
+        // Never send the token to a host other than the user's own instance.
+        String instance = ApiHelpers.activeInstanceUrl();
+        boolean ownHost = instance != null && uri.getHost() != null
+                && uri.getHost().equalsIgnoreCase(Uri.parse(instance).getHost());
+        if (addAuthHeader && token != null && ownHost) {
+            request.addRequestHeader("PRIVATE-TOKEN", token);
         }
         if (mimeType != null) {
             request.setMimeType(mimeType);
@@ -122,7 +126,7 @@ public class DownloadUtils {
                 .header("Accept", "application/octet-stream");
         final String token = Gh4Application.get().getAuthToken();
         if (token != null) {
-            requestBuilder.addHeader("Authorization", "token " + token);
+            requestBuilder.addHeader("PRIVATE-TOKEN", token);
         }
 
         final Handler handler = new Handler(Looper.getMainLooper());

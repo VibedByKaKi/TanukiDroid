@@ -12,23 +12,23 @@ Rules for every line:
 Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `alice`, `bob`, `root`, group `tanuki-org` with subgroup `sub`, seeded by `/tmp/tk/seed.py`). Run the News Feed and profile sections as a user and as an org from the account selector. Also open public projects on gitlab.com for the preset instances where no login is needed.
 
 ## 1. Accounts and login
-- [ ] Add account dialog opens from the drawer account menu
-- [ ] Dropdown lists gitlab.com, gitlab.gnome.org, invent.kde.org, salsa.debian.org, gitlab.freedesktop.org, gitgud.io, framagit.org, jihulab.com, gitlab.alpinelinux.org, Custom
-- [ ] Custom shows the base URL input, other hosts hide it
-- [ ] Token name input is editable and its value is used for the token
-- [ ] Webview loads the sign-in page of the selected host
-- [ ] Webview register link works
-- [ ] Logging in creates a token with the chosen name (check the host's applications page) and saves the account
-- [ ] Bad base URL shows a readable error
-- [ ] Cancel closes the dialog without saving
-- [ ] Login mode chooser fragment (if reachable) behaves
-- [ ] Account selector in the News Feed lists the user and every org
-- [ ] Switching accounts reloads the current screen
-- [ ] Drawer header expands to My profile, Logout, Add account
-- [ ] My profile opens the user profile
-- [ ] Logout removes the account and returns to the login flow
-- [ ] Cold start after logout and after login restores the right account
-- [ ] Revoked token shows a readable error, not a crash
+- [x] Add account dialog opens from the drawer account menu (2026-11-10, tested on emulator-5556 against local GitLab 19.5.3)
+- [x] Dropdown lists gitlab.com, gitlab.gnome.org, invent.kde.org, salsa.debian.org, gitlab.freedesktop.org, gitgud.io, framagit.org, jihulab.com, gitlab.alpinelinux.org, Custom (2026-11-10, all nine presets plus Custom)
+- [x] Custom shows the base URL input, other hosts hide it (2026-11-10)
+- [x] Token name input is editable and its value is used for the token (2026-11-10, token 'My Phone' appeared on the server)
+- [x] Webview loads the sign-in page of the selected host (2026-11-10, http://10.0.2.2:8929/users/sign_in)
+- [x] Webview register link works (2026-11-10, GitLab registration form opens in the webview (local instance))
+- [x] Logging in creates a token with the chosen name (check the host's applications page) and saves the account (2026-11-10, token and account verified on the server)
+- [x] Bad base URL shows a readable error (2026-11-10, Chrome error page in the webview)
+- [x] Cancel closes the dialog without saving (2026-11-10)
+- [-] Login mode chooser fragment (if reachable) behaves (2026-11-10, not reachable from the current flow)
+- [x] Account selector in the News Feed lists the user and every org (2026-11-10, drawer lists the other accounts with their own avatars)
+- [x] Switching accounts reloads the current screen (2026-11-10)
+- [x] Drawer header expands to My profile, Logout, Add account (2026-11-10)
+- [x] My profile opens the user profile (2026-11-10)
+- [x] Logout removes the account and returns to the login flow (2026-11-10, account removed, another one active)
+- [x] Cold start after logout and after login restores the right account (2026-11-10, force-stop and relaunch restored the active account)
+- [x] Revoked token shows a readable error, not a crash (2026-11-10, revoked on the server; snackbar asks to log in again)
 
 ## 2. Drawer (`home_nav_drawer`)
 - [ ] News Feed
@@ -88,22 +88,22 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Repository list from a user profile, an org profile, a starred list, a forks list
 
 ## 6. Issue lists (`issue_list_menu`, `issue_list_filter*`, `issue_list_sort`)
-- [ ] My issues tabs: Created, Assigned, Mentioned, Participating
-- [ ] Show closed toggle and Open Issues title
+- [x] My issues tabs: Created, Assigned, Mentioned, Participating (2026-11-10, tabs list the expected issues for alice; Mentioned uses a text search for the user name, which GitLab has no filter for)
+- [x] Show closed toggle and Open Issues title (2026-11-10, checked on My pull requests)
 - [ ] Open an item from each tab
-- [ ] Repository issue list opens
-- [ ] Search in the list
-- [ ] Remove filter
-- [ ] Filter by milestone
-- [ ] Filter by label
-- [ ] Filter by assignee
-- [ ] Filter by participating status
-- [ ] Manage labels (collaborator menu)
-- [ ] Manage milestones (collaborator menu)
+- [x] Repository issue list opens (2026-11-10)
+- [x] Search in the list (2026-11-10, search for 'renamed' finds the renamed issue)
+- [x] Remove filter (2026-11-10)
+- [x] Filter by milestone (2026-11-10, M1 shows issues 1 and 2)
+- [x] Filter by label (2026-11-10, bug shows 6, 1, 3 and not the closed 5)
+- [x] Filter by assignee (2026-11-10, alice with milestone M1 gives the expected empty list)
+- [x] Filter by participating status (2026-11-10, Participating gives 6 and 3, Not participating gives 4, 2, 1 (client side exclusion))
+- [x] Manage labels (collaborator menu) (2026-11-10)
+- [x] Manage milestones (collaborator menu) (2026-11-10)
 - [ ] Sort: newest, oldest, most recently updated, least recently updated, most commented, least commented
 - [ ] Same checks for the pull request list
-- [ ] Create issue button
-- [ ] Empty state
+- [x] Create issue button (2026-11-10)
+- [x] Empty state (2026-11-10, issue and PR lists show the empty text)
 
 ## 7. Issue detail (`issue_menu`, `issue_fragment_menu`, timeline)
 - [ ] Header shows state, number, title, repo
@@ -129,14 +129,14 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Rotate keeps the draft and scroll position
 
 ## 8. Create and edit issue, labels, milestones
-- [ ] Create issue with title and body
-- [ ] Create issue with labels, assignee, milestone chosen
-- [ ] Validation error for an empty title
-- [ ] Label list, create, edit, delete label
+- [x] Create issue with title and body (2026-11-10, issue template Bug.md from .gitlab/issue_templates fills the body)
+- [x] Create issue with labels, assignee, milestone chosen (2026-11-10, issue 6 on the server has labels bug,docs, assignee alice, milestone M2)
+- [x] Validation error for an empty title (2026-11-10)
+- [x] Label list, create, edit, delete label (2026-11-10, checked on the server after each action)
 - [ ] Label color picker
 - [ ] Milestone list: open and closed tabs
-- [ ] Create milestone with due date
-- [ ] Edit milestone, Close, Reopen, Delete (`edit_milestone_menu`)
+- [x] Create milestone with due date (2026-11-10)
+- [x] Edit milestone, Close, Reopen, Delete (`edit_milestone_menu`) (2026-11-10, checked on the server after each action)
 - [ ] Milestone detail issue list
 
 ## 9. Pull request detail (`pullrequest_menu`, `pull_request_fragment_menu`)

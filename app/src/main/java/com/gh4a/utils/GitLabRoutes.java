@@ -174,7 +174,11 @@ final class GitLabRoutes {
         });
         route("GET", "users/{username}", c -> {
             String name = c.p("username");
-            JSONArray found = c.get("/users", "username", name).arr();
+            Up lookup = c.get("/users", "username", name);
+            if (lookup.code == 401 || lookup.code == 403) {
+                return c.error(lookup);
+            }
+            JSONArray found = lookup.arr();
             if (found.length() > 0) {
                 long id = found.optJSONObject(0).optLong("id");
                 Up full = c.get("/users/" + id);
@@ -692,6 +696,7 @@ final class GitLabRoutes {
         if (path == null) {
             path = "";
         }
+        path = path.replaceFirst("^/+", "");
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
@@ -1296,6 +1301,8 @@ final class GitLabRoutes {
                 put(ao, "name", str(a, "name"));
                 put(ao, "size", 0);
                 put(ao, "download_count", 0);
+                put(ao, "created_at", GitLabMapper.time(str(r, "created_at")));
+                put(ao, "updated_at", GitLabMapper.time(str(r, "created_at")));
                 put(ao, "content_type", "application/octet-stream");
                 String url = str(a, "direct_asset_url");
                 put(ao, "browser_download_url", url != null ? url : str(a, "url"));
@@ -1309,6 +1316,19 @@ final class GitLabRoutes {
                     put(o, "zipball_url", str(a, "url"));
                 } else if ("tar.gz".equals(format)) {
                     put(o, "tarball_url", str(a, "url"));
+                }
+                if ("zip".equals(format) || "tar.gz".equals(format)) {
+                    JSONObject src = newObj();
+                    put(src, "id", GitLabMapper.nameId(str(a, "url")));
+                    put(src, "name", "Source code (" + format + ")");
+                    put(src, "size", 0);
+                    put(src, "download_count", 0);
+                    put(src, "created_at", GitLabMapper.time(str(r, "created_at")));
+                    put(src, "updated_at", GitLabMapper.time(str(r, "created_at")));
+                    put(src, "content_type", "zip".equals(format) ? "application/zip"
+                            : "application/gzip");
+                    put(src, "browser_download_url", str(a, "url"));
+                    assets.put(src);
                 }
             }
         }

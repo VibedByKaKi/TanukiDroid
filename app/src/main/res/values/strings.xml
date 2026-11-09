@@ -302,6 +302,8 @@
     <string name="repo_files">Files</string>
     <string name="repo_short">Repos</string>
     <string name="repo_no_readme">No README file found</string>
+    <string name="watching_repo">Watching, notifications are on</string>
+    <string name="not_watching_repo">Not watching</string>
     <string name="repo_issue_on">%1$s on %2$s/%3$s</string>
     <string name="repo_activity">Activity</string>
 

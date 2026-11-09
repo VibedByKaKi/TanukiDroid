@@ -497,7 +497,8 @@ public class IssueEditActivity extends BasePagerActivity implements
             builder.body(mEditIssue.body());
         }
         if (!ObjectsCompat.equals(mEditIssue.milestone(), mOriginalIssue.milestone())) {
-            builder.milestone(milestone != null ? milestone.number() : null);
+            // A null milestone is not serialized, so 0 stands for "no milestone".
+            builder.milestone(milestone != null ? milestone.number() : Integer.valueOf(0));
         }
         if (!ObjectsCompat.equals(mEditIssue.assignees(), mOriginalIssue.assignees())) {
             List<String> assignees = new ArrayList<>();

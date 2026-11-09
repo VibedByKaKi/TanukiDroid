@@ -323,11 +323,14 @@ public class RepositoryActivity extends BaseFragmentPagerActivity implements
                 }
                 return true;
             case R.id.zip_download: {
-                // GitLab serves archives at /archive/{ref}.zip and needs the token header.
+                // GitLab serves archives at /-/archive/{ref}/{name}.zip and needs the token header.
+                final String ref = getCurrentRef();
                 final String zipUrl = Uri.parse(mRepository.url())
                         .buildUpon()
+                        .appendPath("-")
                         .appendPath("archive")
-                        .appendPath(getCurrentRef() + ".zip")
+                        .appendPath(ref)
+                        .appendPath(mRepoName + "-" + ref.replace('/', '-') + ".zip")
                         .toString();
                 DownloadUtils.enqueueAuthenticatedDownloadWithPermissionCheck(this, zipUrl,
                         "application/zip", mRepoName + "-" + getCurrentRef() + ".zip");

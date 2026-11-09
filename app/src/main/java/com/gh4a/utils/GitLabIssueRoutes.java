@@ -372,7 +372,7 @@ final class GitLabIssueRoutes {
             put(body, "assignee_ids", ids);
         }
         if (in.has("milestone")) {
-            if (in.isNull("milestone")) {
+            if (in.isNull("milestone") || in.optLong("milestone") == 0) {
                 put(body, "milestone_id", 0);
             } else {
                 long id = milestoneId(c, in.optLong("milestone"));
@@ -458,6 +458,7 @@ final class GitLabIssueRoutes {
         }
         boolean wantIssues = true;
         boolean wantMrs = true;
+        boolean unmerged = false;
         String state = null;
         for (String v : list(quals, "is")) {
             if ("issue".equals(v)) {
@@ -471,6 +472,8 @@ final class GitLabIssueRoutes {
             } else if ("merged".equals(v)) {
                 state = "merged";
                 wantIssues = false;
+            } else if ("unmerged".equals(v)) {
+                unmerged = true;
             }
         }
         for (String v : list(quals, "type")) {
@@ -492,6 +495,18 @@ final class GitLabIssueRoutes {
         for (String v : list(quals, "label")) {
             common.add("labels");
             common.add(v);
+        }
+        for (String v : list(quals, "no")) {
+            if ("label".equals(v)) {
+                common.add("labels");
+                common.add("None");
+            } else if ("milestone".equals(v)) {
+                common.add("milestone");
+                common.add("None");
+            } else if ("assignee".equals(v)) {
+                common.add("assignee_id");
+                common.add("None");
+            }
         }
         for (String v : list(quals, "milestone")) {
             common.add("milestone");
@@ -559,43 +574,96 @@ final class GitLabIssueRoutes {
                 if (issues && !wantIssues || !issues && !wantMrs) {
                     continue;
                 }
-                List<String> query = new ArrayList<>(common);
-                query.addAll(variant);
-                String useState = state;
-                if (issues && "merged".equals(useState)) {
+                // GitLab keeps merged merge requests apart from closed ones; GitHub does not.
+                List<String> states = new ArrayList<>();
+                if (state == null) {
+                    states.add(null);
+                } else if (issues && "merged".equals(state)) {
                     continue;
-                }
-                if (useState != null) {
-                    query.add("state");
-                    query.add(useState);
-                }
-                if (scopeBase == null || scopeBase.isEmpty()) {
-                    query.add("scope");
-                    query.add("all");
-                }
-                String base = scopeBase == null ? "" : scopeBase;
-                String path = (base.isEmpty() ? "" : base) + (issues ? "/issues" : "/merge_requests");
-                Up up = c.getPaged(path, query.toArray(new String[0]));
-                last = up;
-                if (!up.ok()) {
-                    if (up.code == 404 || up.code == 403) {
-                        continue;
+                } else if (!issues && "closed".equals(state)) {
+                    states.add("closed");
+                    if (!unmerged) {
+                        states.add("merged");
                     }
-                    return c.error(up);
+                } else {
+                    states.add(state);
                 }
-                JSONArray a = up.arr();
-                for (int i = 0; i < a.length(); i++) {
-                    items.add(a.optJSONObject(i));
+                for (String useState : states) {
+                    List<String> query = new ArrayList<>(common);
+                    query.addAll(variant);
+                    if (useState != null) {
+                        query.add("state");
+                        query.add(useState);
+                    }
+                    if (scopeBase == null || scopeBase.isEmpty()) {
+                        query.add("scope");
+                        query.add("all");
+                    }
+                    String base = scopeBase == null ? "" : scopeBase;
+                    String path = (base.isEmpty() ? "" : base)
+                            + (issues ? "/issues" : "/merge_requests");
+                    Up up = c.getPaged(path, query.toArray(new String[0]));
+                    last = up;
+                    if (!up.ok()) {
+                        if (up.code == 404 || up.code == 403) {
+                            continue;
+                        }
+                        return c.error(up);
+                    }
+                    JSONArray a = up.arr();
+                    for (int i = 0; i < a.length(); i++) {
+                        items.add(a.optJSONObject(i));
+                    }
+                    if (up.nextPage() > 0) {
+                        hasNext = true;
+                    }
+                    total += Math.max(up.total(), a.length());
                 }
-                if (up.nextPage() > 0) {
-                    hasNext = true;
-                }
-                total += Math.max(up.total(), a.length());
             }
         }
 
+        // "-involves:user" has no GitLab equivalent: drop everything the user is involved in.
+        List<String> notInvolved = list(quals, "-involves");
+        if (!notInvolved.isEmpty()) {
+            Map<Long, Boolean> excluded = new HashMap<>();
+            for (String user : notInvolved) {
+                for (String role : new String[] {"author_username", "assignee_username"}) {
+                    for (String kindPath : new String[] {"/issues", "/merge_requests"}) {
+                        for (int page = 1; page <= 3; page++) {
+                            String base = scopeBase == null ? "" : scopeBase;
+                            Up involved = c.get(base + kindPath, role, user, "scope", "all",
+                                    "per_page", "100", "page", String.valueOf(page));
+                            if (!involved.ok()) {
+                                break;
+                            }
+                            JSONArray ia = involved.arr();
+                            for (int i = 0; i < ia.length(); i++) {
+                                JSONObject o = ia.optJSONObject(i);
+                                excluded.put(o.optLong("id") * 2 + (o.has("source_branch") ? 1 : 0),
+                                        true);
+                            }
+                            if (ia.length() < 100) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            List<JSONObject> kept = new ArrayList<>();
+            for (JSONObject o : items) {
+                if (!excluded.containsKey(o.optLong("id") * 2 + (o.has("source_branch") ? 1 : 0))) {
+                    kept.add(o);
+                }
+            }
+            items = kept;
+        }
+
         // Several queries (issues + merge requests, several filters) are merged by update time.
-        Collections.sort(items, (a, b) -> str(b, "updated_at").compareTo(str(a, "updated_at")));
+        final String sortField = "created".equals(c.q("sort")) ? "created_at" : "updated_at";
+        final boolean ascending = "asc".equals(c.q("order"));
+        Collections.sort(items, (a, b) -> ascending
+                ? str(a, sortField).compareTo(str(b, sortField))
+                : str(b, sortField).compareTo(str(a, sortField)));
         Map<Long, Boolean> seen = new HashMap<>();
         JSONArray out = new JSONArray();
         for (JSONObject o : items) {
@@ -906,10 +974,10 @@ final class GitLabIssueRoutes {
 
     private static JSONObject milestoneWithCounts(Ctx c, JSONObject m) throws IOException {
         JSONObject o = GitLabMapper.milestone(m);
-        long id = m.optLong("id");
-        Up open = c.get("/projects/" + c.project() + "/milestones/" + id + "/issues",
+        // The milestone issue list ignores the state filter, the project issue list does not.
+        Up open = c.get("/projects/" + c.project() + "/issues", "milestone", str(m, "title"),
                 "state", "opened", "per_page", "1");
-        Up closed = c.get("/projects/" + c.project() + "/milestones/" + id + "/issues",
+        Up closed = c.get("/projects/" + c.project() + "/issues", "milestone", str(m, "title"),
                 "state", "closed", "per_page", "1");
         put(o, "open_issues", open.total() >= 0 ? open.total() : open.arr().length());
         put(o, "closed_issues", closed.total() >= 0 ? closed.total() : closed.arr().length());

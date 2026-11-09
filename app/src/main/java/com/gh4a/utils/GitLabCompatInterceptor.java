@@ -396,6 +396,13 @@ public class GitLabCompatInterceptor implements Interceptor {
             Matcher m = route.pattern.matcher(normalized);
             if (m.matches()) {
                 Ctx ctx = new Ctx(chain, request, route, m);
+                if (!"GET".equals(method) && Log.isLoggable(TAG, Log.DEBUG)) {
+                    try {
+                        Log.d(TAG, method + " " + path + " body " + ctx.bodyString());
+                    } catch (IOException ignored) {
+                        // only for logging
+                    }
+                }
                 try {
                     return route.handler.handle(ctx);
                 } catch (RuntimeException e) {
