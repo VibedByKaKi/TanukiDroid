@@ -1196,6 +1196,15 @@ final class GitLabRoutes {
                     + (tag ? "tags/" : "branches/") + enc(c.p("name")), null);
             return up.ok() ? c.empty(204) : c.error(up);
         });
+        // The SDK sends "heads/name" as one percent-encoded path segment
+        route("DELETE", "repos/{owner}/{repo}/git/refs/{ref}", c -> {
+            String ref = c.p("ref");
+            boolean tag = ref.startsWith("tags/");
+            String name = ref.replaceFirst("^(heads|tags)/", "");
+            Up up = c.call("DELETE", "/projects/" + c.project() + "/repository/"
+                    + (tag ? "tags/" : "branches/") + enc(name), null);
+            return up.ok() ? c.empty(204) : c.error(up);
+        });
         route("GET", "repos/{owner}/{repo}/git/trees/{sha*}", c -> {
             String sha = c.p("sha");
             Up up = c.getPaged("/projects/" + c.project() + "/repository/tree", "ref", sha,

@@ -151,7 +151,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Menu: Share (2026-11-10, PR; share sheet shows the real merge_requests URL)
 - [x] Menu: Open in browser (2026-11-10, PR; opens Chrome)
 - [x] Menu: Copy number (2026-11-10, PR)
-- [ ] Delete branch after merge
+- [x] Delete branch after merge (2026-11-10, merged as root from the app; Delete branch and Restore branch in the overflow menu change the branch on the server)
 - [x] Comment, edit and delete a PR comment (2026-11-10, comment created and deleted on the server)
 - [-] Create pull request (2026-11-10, the app has no create pull request screen (same as OctoDroid))
 - [x] Merged and closed states render correctly (2026-11-10)
