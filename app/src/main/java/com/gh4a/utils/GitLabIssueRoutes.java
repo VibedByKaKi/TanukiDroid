@@ -1658,8 +1658,42 @@ final class GitLabIssueRoutes {
             put(o, "ignored", false);
             return c.json(o);
         });
-        route("PUT", "notifications/threads/{id}/subscription", c -> c.json(newObj()));
-        route("DELETE", "notifications/threads/{id}/subscription", c -> c.empty(204));
+        route("PUT", "notifications/threads/{id}/subscription", c -> {
+            boolean ignore = c.bodyJson().optBoolean("ignored");
+            Response r = subscribeTodoTarget(c, !ignore);
+            return r != null ? r : c.json(newObj());
+        });
+        route("DELETE", "notifications/threads/{id}/subscription", c -> {
+            Response r = subscribeTodoTarget(c, false);
+            return r != null ? r : c.empty(204);
+        });
+    }
+
+    /** Subscribes to or unsubscribes from the issue or merge request behind a to-do. */
+    private static Response subscribeTodoTarget(Ctx c, boolean subscribe) throws IOException {
+        for (String state : new String[] {"pending", "done"}) {
+            JSONArray a = c.get("/todos", "state", state, "per_page", "100").arr();
+            for (int i = 0; i < a.length(); i++) {
+                JSONObject t = a.optJSONObject(i);
+                if (t.optLong("id") != Long.parseLong(c.p("id"))) {
+                    continue;
+                }
+                JSONObject target = t.optJSONObject("target");
+                JSONObject project = t.optJSONObject("project");
+                String type = str(t, "target_type");
+                if (target == null || project == null
+                        || !"Issue".equals(type) && !"MergeRequest".equals(type)) {
+                    return null;
+                }
+                Up up = c.call("POST", "/projects/" + project.optLong("id")
+                        + ("Issue".equals(type) ? "/issues/" : "/merge_requests/")
+                        + target.optLong("iid") + (subscribe ? "/subscribe" : "/unsubscribe"),
+                        null);
+                // 304 means the subscription already was in the requested state.
+                return up.ok() || up.code == 304 ? null : c.error(up);
+            }
+        }
+        return null;
     }
 
     private static JSONObject todo(Ctx c, JSONObject t) throws IOException {

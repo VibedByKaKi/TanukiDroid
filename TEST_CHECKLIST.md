@@ -66,12 +66,12 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 4. Notifications (`notification_list_menu`, `notification_menu`)
 - [x] List loads, empty state shows when there are none (2026-11-10, todos list and empty state)
-- [ ] Filter menu: Unread, All, Participating
-- [ ] Mark all as read
+- [x] Filter menu: Unread, All, Participating (2026-11-10, local server, alice)
+- [x] Mark all as read (2026-11-10, local server, alice)
 - [x] Row tap opens the issue, PR or commit (2026-11-10, issue opened from a notification)
-- [ ] Row avatar tap opens the user
-- [ ] Row action button: Mark as read
-- [ ] Row action button: Unsubscribe
+- [x] Row avatar tap opens the user (2026-11-10, local server, alice)
+- [x] Row action button: Mark as read (2026-11-10, local server, alice)
+- [x] Row action button: Unsubscribe (2026-11-10, local server, alice)
 - [ ] Notification polling and the system notification (Settings > Notifications on)
 
 ## 5. My repositories and repository lists (`repo_list_menu`, `repo_filter_*`, `repo_sort`)
@@ -168,7 +168,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Missing patch is filled from the `.diff` endpoint
 
 ## 11. Commits (`commit_menu`, `commit_comment_actions`, `commit_history_menu`)
-- [ ] Commit list on the repo Commits tab, paginate
+- [x] Commit list on the repo Commits tab, paginate (2026-11-10, 50 commits, pages 1-3 load on scroll)
 - [ ] Commit list for a file with Follow renames toggle
 - [x] Commit detail: message, author, stats, files changed (2026-11-10)
 - [ ] Commit menu: Open in browser, Share
