@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -270,10 +271,7 @@ final class GitLabIssueRoutes {
             return up.ok() ? c.jsonPaged(issuesWithRepo(c, up.arr()), up) : c.error(up);
         });
         route("GET", "user/issues", c -> {
-            List<String> q = issueFilterQuery(c);
-            q.add("scope");
-            q.add("all");
-            Up up = c.getPaged("/issues", q.toArray(new String[0]));
+            Up up = globalList(c, "/issues", issueFilterQuery(c), true);
             return up.ok() ? c.jsonPaged(issuesWithRepo(c, up.arr()), up) : c.error(up);
         });
         route("GET", "repos/{owner}/{repo}/issues/{number}", c -> {
@@ -433,6 +431,29 @@ final class GitLabIssueRoutes {
 
     private static final Pattern QUERY_TOKEN =
             Pattern.compile("[^\\s\"]+:\"[^\"]*\"|\"[^\"]*\"|\\S+");
+
+    /**
+     * Instance-wide issue and merge request lists. Self-managed instances accept scope=all with a
+     * user filter, gitlab.com only accepts the "mine" scopes there.
+     */
+    private static Up globalList(Ctx c, String path, List<String> query, boolean paged)
+            throws IOException {
+        List<String> q = new ArrayList<>(query);
+        q.add("scope");
+        q.add("all");
+        Up up = paged ? c.getPaged(path, q.toArray(new String[0]))
+                : c.get(path, q.toArray(new String[0]));
+        if (up.code == 400 && up.body.contains("scope=all")) {
+            boolean assigneeOnly = query.contains("assignee_username")
+                    && !query.contains("author_username");
+            q = new ArrayList<>(query);
+            q.add("scope");
+            q.add(assigneeOnly ? "assigned_to_me" : "created_by_me");
+            up = paged ? c.getPaged(path, q.toArray(new String[0]))
+                    : c.get(path, q.toArray(new String[0]));
+        }
+        return up;
+    }
 
     static Response searchIssues(Ctx c) throws IOException {
         String q = c.q("q") != null ? c.q("q") : "";
@@ -595,14 +616,12 @@ final class GitLabIssueRoutes {
                         query.add("state");
                         query.add(useState);
                     }
-                    if (scopeBase == null || scopeBase.isEmpty()) {
-                        query.add("scope");
-                        query.add("all");
-                    }
+                    boolean global = scopeBase == null || scopeBase.isEmpty();
                     String base = scopeBase == null ? "" : scopeBase;
                     String path = (base.isEmpty() ? "" : base)
                             + (issues ? "/issues" : "/merge_requests");
-                    Up up = c.getPaged(path, query.toArray(new String[0]));
+                    Up up = global ? globalList(c, path, query, true)
+                            : c.getPaged(path, query.toArray(new String[0]));
                     last = up;
                     if (!up.ok()) {
                         if (up.code == 404 || up.code == 403) {
@@ -631,8 +650,11 @@ final class GitLabIssueRoutes {
                     for (String kindPath : new String[] {"/issues", "/merge_requests"}) {
                         for (int page = 1; page <= 3; page++) {
                             String base = scopeBase == null ? "" : scopeBase;
-                            Up involved = c.get(base + kindPath, role, user, "scope", "all",
-                                    "per_page", "100", "page", String.valueOf(page));
+                            List<String> iq = new ArrayList<>(Arrays.asList(role, user,
+                                    "per_page", "100", "page", String.valueOf(page)));
+                            Up involved = base.isEmpty()
+                                    ? globalList(c, kindPath, iq, false)
+                                    : c.get(base + kindPath, iq.toArray(new String[0]));
                             if (!involved.ok()) {
                                 break;
                             }

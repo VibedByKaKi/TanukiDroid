@@ -31,18 +31,18 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Revoked token shows a readable error, not a crash (2026-11-10, revoked on the server; snackbar asks to log in again)
 
 ## 2. Drawer (`home_nav_drawer`)
-- [ ] News Feed
-- [ ] Notifications
-- [ ] My repositories
-- [ ] My issues
-- [ ] My pull requests
-- [ ] My gists
-- [ ] Search
-- [ ] Bookmarks and Stars
-- [ ] Public Timeline (hidden or clear message on GitLab)
-- [ ] Trending Repos (hidden or clear message on GitLab)
-- [ ] GitHub Blog (hidden, since it is GitHub-only)
-- [ ] Settings
+- [x] News Feed (2026-11-10)
+- [x] Notifications (2026-11-10, drawer, gitlab.com)
+- [x] My repositories (2026-11-10, drawer, gitlab.com)
+- [x] My issues (2026-11-10, drawer, gitlab.com)
+- [x] My pull requests (2026-11-10, opens on gitlab.com)
+- [x] My gists (2026-11-10, drawer, gitlab.com)
+- [x] Search (2026-11-10, drawer, gitlab.com)
+- [x] Bookmarks and Stars (2026-11-10, opens on gitlab.com)
+- [x] Public Timeline (hidden or clear message on GitLab) (2026-11-10, drawer, gitlab.com)
+- [x] Trending Repos (hidden or clear message on GitLab) (2026-11-10, drawer, gitlab.com)
+- [x] GitHub Blog (hidden, since it is GitHub-only) (2026-11-10, drawer, gitlab.com)
+- [x] Settings (2026-11-10, drawer, gitlab.com)
 - [ ] Add account, My profile, Logout from the header menu
 - [ ] Back from each screen returns to the previous one without leaving the app unexpectedly
 - [ ] Drawer swipe open and close, selected item is highlighted
@@ -50,8 +50,8 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 ## 3. News Feed
 - [ ] Pull to refresh
 - [ ] Scroll to load the next page
-- [ ] Tap an avatar opens that user
-- [ ] Tap a repo name opens the repo
+- [x] Tap an avatar opens that user (2026-11-10, gitlab.com)
+- [x] Tap a repo name opens the repo (2026-11-10, gitlab.com)
 - [ ] Push event row, tap row, tap each listed commit
 - [ ] Create repository, branch and tag rows
 - [ ] Delete branch and tag rows
