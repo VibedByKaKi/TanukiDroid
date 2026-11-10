@@ -49,7 +49,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 3. News Feed
 - [x] Pull to refresh (2026-11-10, feed reloads on pull down)
-- [ ] Scroll to load the next page
+- [x] Scroll to load the next page (2026-11-10, feed continues past the first page down to issue 19 after 30 new events)
 - [x] Tap an avatar opens that user (2026-11-10, gitlab.com)
 - [x] Tap a repo name opens the repo (2026-11-10, gitlab.com)
 - [x] Push event row, tap row, tap each listed commit (2026-11-10, gitlab.com KaKi87 feed, rows tapped through)
