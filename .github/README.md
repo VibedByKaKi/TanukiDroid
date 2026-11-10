@@ -4,10 +4,10 @@ GitLab client for Android. Fork of [OctoDroid (gh4a)](https://github.com/slapper
 
 The upstream project README stays in [README.md](../README.md) at the repository root.
 
-| [![](assets/get-it-on-github.png)](https://github.com/VibedByKaKi/TanukiDroid/actions/workflows/build-apk.yml) |
-| --- |
+| [![](assets/get-it-on-github.png)](https://github.com/VibedByKaKi/TanukiDroid/releases/tag/latest) | [![](assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%257B%2522id%2522%253A%2520%2522com.vibedbykaki.tanukidroid%2522%252C%2520%2522url%2522%253A%2520%2522https%253A%252F%252Fgithub.com%252FVibedByKaKi%252FTanukiDroid%2522%252C%2520%2522author%2522%253A%2520%2522VibedByKaKi%2522%252C%2520%2522name%2522%253A%2520%2522TanukiDroid%2522%252C%2520%2522preferredApkIndex%2522%253A%25200%252C%2520%2522additionalSettings%2522%253A%2520%2522%257B%255C%2522includePrereleases%255C%2522%253A%2520true%252C%2520%255C%2522fallbackToOlderReleases%255C%2522%253A%2520true%252C%2520%255C%2522apkFilterRegEx%255C%2522%253A%2520%255C%2522.%252A%255C%255C%255C%255C.apk%2524%255C%2522%257D%2522%257D) |
+| --- | --- |
 
-CI builds a signed release APK on every push. Download the latest artifact from [Actions, Build APK](https://github.com/VibedByKaKi/TanukiDroid/actions/workflows/build-apk.yml) (`TanukiDroid-release-<build-number>.apk`, uploaded without ZIP wrapping).
+The APK is a rolling GitHub prerelease on the [`latest`](https://github.com/VibedByKaKi/TanukiDroid/releases/tag/latest) tag. Direct download: [TanukiDroid.apk](https://github.com/VibedByKaKi/TanukiDroid/releases/download/latest/TanukiDroid.apk). In Obtainium, keep **Include pre-releases** on if you add the repo by hand. Every CI run also uploads `TanukiDroid-release-<build-number>.apk` as a workflow artifact.
 
 ## What this fork changes
 
@@ -18,7 +18,7 @@ CI builds a signed release APK on every push. Download the latest artifact from 
 
 ## CI
 
-- **Build APK** runs on push, pull request and manual dispatch. It uploads `TanukiDroid-release-<run_number>.apk` with `archive: false`.
+- **Build APK** runs on push, pull request and manual dispatch. It uploads `TanukiDroid-release-<run_number>.apk` with `archive: false`. Pushes to `master` also replace the `latest` prerelease with `TanukiDroid.apk`.
 
 ## Credits
 
