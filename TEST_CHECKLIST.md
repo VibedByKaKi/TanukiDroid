@@ -163,7 +163,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Diff hunk menu: Share, View in file
 - [x] Diff viewer for a commit and for a PR file (2026-11-10, PR file diff renders with the inline comment)
 - [x] Add inline comment, reply, edit, delete (2026-11-10, verified on the server)
-- [ ] Share a diff line (`file_line_menu`)
+- [x] Share a diff line (`file_line_menu`) (2026-11-10, shares the commit URL; the GitHub style line anchor is ignored by GitLab)
 - [x] Large and binary diffs do not crash (2026-11-10, big.txt (4000/3000 lines) and new.bin open)
 - [ ] Missing patch is filled from the `.diff` endpoint
 
@@ -172,7 +172,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [-] Commit list for a file with Follow renames toggle (2026-11-10, History opens; there is no follow-renames toggle because the GitLab commits API cannot follow renames)
 - [x] Commit detail: message, author, stats, files changed (2026-11-10)
 - [x] Commit menu: Open in browser, Share (2026-11-10, toolbar shows both on a commit)
-- [ ] Open a changed file from a commit
+- [x] Open a changed file from a commit (2026-11-10, README.md diff opens)
 - [x] Commit comments tab: add comment (2026-11-10, list, add; comments now use the discussions API and render markdown)
 - [-] Commit comment actions: Share, Reply, Add comment, Add reaction, Edit, Delete (2026-11-10, Share, Edit and Delete verified on the server; Reply and reactions not on GitLab commit comments)
 - [x] Commit compare view between two refs (2026-11-10, deep link to a compare URL lists the commits)
