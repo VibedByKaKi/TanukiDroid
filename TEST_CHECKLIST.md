@@ -60,7 +60,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Pull request opened, closed, reopened and merged rows, tap through (opens the PR screen) (2026-11-10, opened, closed and merged rows shown, merged row opens the PR; GitLab has no separate reopened event)
 - [x] Pull request comment row, tap through (opens the PR screen, not the issue screen) (2026-11-10, opens the PR review screen)
 - [-] Fork, star and release rows, tap through (2026-11-10, GitLab has no fork or star events; a release shows as a created tag row, which opens the repo at the tag)
-- [ ] Unsupported event types are skipped without a blank row
+- [x] Unsupported event types are skipped without a blank row (2026-11-10, no blank rows in the local and gitlab.com feeds, which include member, push, branch, tag, issue, merge request and comment events)
 - [x] No "null", "pull request 0" or raw `number|title` text (2026-11-10, local and gitlab.com feeds)
 - [x] Same checks for an org feed (2026-11-10, tanuki-org Public Activity shows rows)
 
@@ -225,9 +225,9 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Profile repository count matches the server (2026-11-10, bob shows 0 repositories, tanuki-org 1 repository)
 - [x] Profile menu: Share, Open in browser, Bookmark (2026-11-10, menu shows Share, Open in browser, Bookmark, Open in new window)
 - [x] Follow and unfollow (2026-11-10, alice follows bob, button toggles, server confirms)
-- [ ] Followers list, Following list (followers list verified 2026-11-10, following list not yet)
+- [x] Followers list, Following list (2026-11-10, bob followed by alice, bob follows alice)
 - [-] Starred repos of a user (2026-11-10, profile has no starred row)
-- [ ] Organizations of a user
+- [-] Organizations of a user (2026-11-10, the profile has no organizations section)
 - [x] Org profile and org repos (2026-11-10, tanuki-org on local server; profile and Public Activity)
 - [x] Org members list (`OrganizationMemberListFragment`), open a member (2026-11-10, 1 member, opens root)
 - [x] Contributors list, open a contributor (2026-11-10, list loads; contributor has no avatar)
