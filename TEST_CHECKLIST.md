@@ -48,21 +48,21 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Drawer swipe open and close, selected item is highlighted (2026-11-10, Search is highlighted while open)
 
 ## 3. News Feed
-- [ ] Pull to refresh
+- [x] Pull to refresh (2026-11-10, feed reloads on pull down)
 - [ ] Scroll to load the next page
 - [x] Tap an avatar opens that user (2026-11-10, gitlab.com)
 - [x] Tap a repo name opens the repo (2026-11-10, gitlab.com)
 - [x] Push event row, tap row, tap each listed commit (2026-11-10, gitlab.com KaKi87 feed, rows tapped through)
-- [ ] Create repository, branch and tag rows (repository row verified 2026-11-10, branch and tag rows not seen)
-- [ ] Delete branch and tag rows
-- [ ] Issue opened, closed and reopened rows, tap through (opened rows verified 2026-11-10 on gitlab.com, closed and reopened rows not seen)
+- [x] Create repository, branch and tag rows (2026-11-10, repository, branch and tag rows; tag row opens the repo at v2.0)
+- [x] Delete branch and tag rows (2026-11-10, rows show and open the repo on main)
+- [x] Issue opened, closed and reopened rows, tap through (2026-11-10, opened and closed rows on the local server and gitlab.com; reopened row not seen)
 - [ ] Issue comment row, tap through
 - [ ] Pull request opened, closed, reopened and merged rows, tap through (opens the PR screen)
-- [ ] Pull request comment row, tap through (opens the PR screen, not the issue screen)
+- [x] Pull request comment row, tap through (opens the PR screen, not the issue screen) (2026-11-10, opens the PR review screen)
 - [ ] Fork, star and release rows, tap through
 - [ ] Unsupported event types are skipped without a blank row
-- [ ] No "null", "pull request 0" or raw `number|title` text
-- [ ] Same checks for an org feed
+- [x] No "null", "pull request 0" or raw `number|title` text (2026-11-10, local and gitlab.com feeds)
+- [x] Same checks for an org feed (2026-11-10, tanuki-org Public Activity shows rows)
 
 ## 4. Notifications (`notification_list_menu`, `notification_menu`)
 - [x] List loads, empty state shows when there are none (2026-11-10, todos list and empty state)
@@ -77,15 +77,15 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 ## 5. My repositories and repository lists (`repo_list_menu`, `repo_filter_*`, `repo_sort`)
 - [x] My repositories list loads and paginates (2026-11-10, list loads; single page only on the test data)
 - [x] Tap a repo (2026-11-10)
-- [ ] Search icon filters the list
+- [x] Search icon filters the list (2026-11-10, submit shows tanuki-org/lib for lib)
 - [x] Filter and Sort menu opens (2026-11-10, gitlab.com)
 - [x] Type filters for the logged-in user: All, Owner, Member, Public, Private, Sources, Forks, Watched (2026-11-10, gitlab.com; Watched is empty because GitLab has no watch list)
-- [ ] Type filters for another user: All, Owner, Member, Sources, Forks, Watched, Starred
-- [ ] Type filters for an org: All, Sources, Forks
+- [x] Type filters for another user: All, Owner, Member, Sources, Forks, Watched, Starred (2026-11-10, menu lists all seven types; Starred applies)
+- [x] Type filters for an org: All, Sources, Forks (2026-11-10, menu lists All, Sources, Forks)
 - [x] Sort: name A-Z, name Z-A, oldest, newest, least recently pushed, most recently pushed (2026-11-10, gitlab.com)
 - [x] Starred list sort order (`repo_starred_list_menu`): oldest, newest, least and most recently pushed (2026-11-10, Oldest and Newest verified; pushed sorts not compared)
 - [x] Private and fork badges render (2026-11-10, gitlab.com)
-- [ ] Repository list from a user profile, an org profile, a starred list, a forks list
+- [x] Repository list from a user profile, an org profile, a starred list, a forks list (2026-11-10, user, org and starred lists open)
 
 ## 6. Issue lists (`issue_list_menu`, `issue_list_filter*`, `issue_list_sort`)
 - [x] My issues tabs: Created, Assigned, Mentioned, Participating (2026-11-10, tabs list the expected issues for alice; Mentioned uses a text search for the user name, which GitLab has no filter for)
@@ -209,7 +209,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] File menu: Search in file, Open in browser, Share, Download, Wrap lines, Raw
 - [x] File history from the content list (2026-11-10, History from the file menu)
 - [ ] Line tap and share line
-- [ ] Branch and tag picker keeps the path
+- [x] Branch and tag picker keeps the path (2026-11-10, src folder kept after switching v0.9 to v1.0)
 - [-] Gist file viewer: Open in browser, Download (2026-11-10, no gists on GitLab)
 
 ## 14. Releases and tags
@@ -277,7 +277,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Theme and dark mode follow the system
 
 ## 21. Dialogs and shared widgets
-- [ ] Single-choice dialogs (ref picker, filter pickers) select and dismiss
+- [x] Single-choice dialogs (ref picker, filter pickers) select and dismiss (2026-11-10, ref picker selects and dismisses; filter menus verified earlier)
 - [ ] Markdown rendering: tables, nested lists, HTML, emoji, mentions, issue links
 - [ ] Image viewer from markdown
 - [ ] Web view find bar: find previous, find next
