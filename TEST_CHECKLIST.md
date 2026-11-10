@@ -222,7 +222,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 15. Users, orgs and social
 - [x] User profile: avatar, bio, counts, email, website (2026-11-10, KaKi87 on gitlab.com)
-- [ ] Profile repository count matches the server
+- [x] Profile repository count matches the server (2026-11-10, bob shows 0 repositories, tanuki-org 1 repository)
 - [x] Profile menu: Share, Open in browser, Bookmark (2026-11-10, menu shows Share, Open in browser, Bookmark, Open in new window)
 - [x] Follow and unfollow (2026-11-10, alice follows bob, button toggles, server confirms)
 - [ ] Followers list, Following list (followers list verified 2026-11-10, following list not yet)
@@ -241,8 +241,8 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Submit search with keyboard and with the search icon (keyboard submit works, icon not tested)
 - [x] Open a result of each type (2026-11-10, repo and user results open on gitlab.com; issue, PR and code types are not offered)
 - [x] Empty result message (2026-11-10, gitlab.com users)
-- [ ] Exact user and org name search
-- [ ] Pagination
+- [x] Exact user and org name search (2026-11-10, tanuki-org finds the group and sub group)
+- [x] Pagination (2026-11-10, gitlab.com search loads page 2 on scroll)
 - [x] Search history or suggestions if present (2026-11-10, recent query suggestion with Clear suggestions)
 
 ## 17. Bookmarks and stars
@@ -263,7 +263,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [-] Blog list menu: Open in browser (only if reachable) (2026-11-10, screen not reachable on GitLab)
 
 ## 20. Settings
-- [ ] Start page: each option opens that screen at launch (dialog lists 8 options without gists, trending or blog; launch behavior not yet tried)
+- [x] Start page: each option opens that screen at launch (2026-11-10, My issues verified at launch; the dialog lists eight options without gists, trending or blog)
 - [ ] Use built-in browser on and off, then open a link in each mode
 - [x] Notifications switch on and off (2026-11-10, turns on, Sync interval enables and jobs are scheduled)
 - [x] Theme dialog: Use system setting, Day, Night apply immediately (2026-11-10, Night applies immediately)
