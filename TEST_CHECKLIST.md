@@ -191,8 +191,8 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Menu: Download code as ZIP (2026-11-10, valid 16 KB archive saved to Downloads)
 - [x] Menu: Bookmark and remove bookmark (2026-11-10, bookmark list opens the repo)
 - [x] Star, unstar (2026-11-10, server star count checked)
-- [ ] Watch, unwatch
-- [ ] Fork
+- [-] Watch, unwatch (2026-11-10, GitLab has no repository watch, the row is informational)
+- [-] Fork (2026-11-10, the fork action does not exist on this build, same as upstream OctoDroid)
 - [x] Other information: Contributors, Collaborators, Releases, Wiki (2026-11-10, all four screens load)
 - [x] Wiki list and a wiki page (hidden or clear message when the wiki is off) (2026-11-10, pages render as HTML)
 - [x] Activity tab, open an item (2026-11-10, Created a repository row opens the repo)
@@ -264,7 +264,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 20. Settings
 - [x] Start page: each option opens that screen at launch (2026-11-10, My issues verified at launch; the dialog lists eight options without gists, trending or blog)
-- [ ] Use built-in browser on and off, then open a link in each mode
+- [x] Use built-in browser on and off, then open a link in each mode (2026-11-10, on opens a Custom Tab, off sends a plain view intent to the external browser)
 - [x] Notifications switch on and off (2026-11-10, turns on, Sync interval enables and jobs are scheduled)
 - [x] Theme dialog: Use system setting, Day, Night apply immediately (2026-11-10, Night applies immediately)
 - [x] Code view text size dialog lists five sizes (2026-11-10, Smallest to Largest)
@@ -283,7 +283,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Web view find bar: find previous, find next
 - [ ] Print menu
 - [ ] Pull to refresh on every paged list
-- [ ] Error view TRY AGAIN retries
+- [x] Error view TRY AGAIN retries (2026-11-10, airplane test and a transient failure both recover)
 - [ ] Empty view text on every list (checked so far: releases, forks, users search, bookmarks, notifications)
 
 ## 22. Deep links and intents
