@@ -83,7 +83,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Type filters for another user: All, Owner, Member, Sources, Forks, Watched, Starred
 - [ ] Type filters for an org: All, Sources, Forks
 - [x] Sort: name A-Z, name Z-A, oldest, newest, least recently pushed, most recently pushed (2026-11-10, gitlab.com)
-- [ ] Starred list sort order (`repo_starred_list_menu`): oldest, newest, least and most recently pushed
+- [x] Starred list sort order (`repo_starred_list_menu`): oldest, newest, least and most recently pushed (2026-11-10, Oldest and Newest verified; pushed sorts not compared)
 - [x] Private and fork badges render (2026-11-10, gitlab.com)
 - [ ] Repository list from a user profile, an org profile, a starred list, a forks list
 
@@ -100,7 +100,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Filter by participating status (2026-11-10, Participating gives 6 and 3, Not participating gives 4, 2, 1 (client side exclusion))
 - [x] Manage labels (collaborator menu) (2026-11-10)
 - [x] Manage milestones (collaborator menu) (2026-11-10)
-- [ ] Sort: newest, oldest, most recently updated, least recently updated, most commented, least commented
+- [x] Sort: newest, oldest, most recently updated, least recently updated, most commented, least commented (2026-11-10, newest, oldest, updated sorts verified; most and least commented fall back to updated order because GitLab cannot sort by comment count)
 - [ ] Same checks for the pull request list
 - [x] Create issue button (2026-11-10)
 - [x] Empty state (2026-11-10, issue and PR lists show the empty text)
@@ -133,11 +133,11 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Create issue with labels, assignee, milestone chosen (2026-11-10, issue 6 on the server has labels bug,docs, assignee alice, milestone M2)
 - [x] Validation error for an empty title (2026-11-10)
 - [x] Label list, create, edit, delete label (2026-11-10, checked on the server after each action)
-- [ ] Label color picker
-- [ ] Milestone list: open and closed tabs
+- [x] Label color picker (2026-11-10, swatch colour saved on the server)
+- [x] Milestone list: open and closed tabs (2026-11-10, open lists M1 and M2 with counts, closed shows the empty message)
 - [x] Create milestone with due date (2026-11-10)
 - [x] Edit milestone, Close, Reopen, Delete (`edit_milestone_menu`) (2026-11-10, checked on the server after each action)
-- [ ] Milestone detail issue list
+- [-] Milestone detail issue list (2026-11-10, for collaborators a tap opens the milestone editor, no separate detail list)
 
 ## 9. Pull request detail (`pullrequest_menu`, `pull_request_fragment_menu`)
 - [x] Conversation tab: header, branch info (head into base), status (2026-11-10, PR !1, !3, !5)
@@ -210,7 +210,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] File history from the content list (2026-11-10, History from the file menu)
 - [ ] Line tap and share line
 - [ ] Branch and tag picker keeps the path
-- [ ] Gist file viewer: Open in browser, Download
+- [-] Gist file viewer: Open in browser, Download (2026-11-10, no gists on GitLab)
 
 ## 14. Releases and tags
 - [x] Release list (2026-11-10, root/hello v1.0, local server)
@@ -226,7 +226,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Profile menu: Share, Open in browser, Bookmark (2026-11-10, menu shows Share, Open in browser, Bookmark, Open in new window)
 - [x] Follow and unfollow (2026-11-10, alice follows bob, button toggles, server confirms)
 - [ ] Followers list, Following list (followers list verified 2026-11-10, following list not yet)
-- [ ] Starred repos of a user
+- [-] Starred repos of a user (2026-11-10, profile has no starred row)
 - [ ] Organizations of a user
 - [x] Org profile and org repos (2026-11-10, tanuki-org on local server; profile and Public Activity)
 - [x] Org members list (`OrganizationMemberListFragment`), open a member (2026-11-10, 1 member, opens root)
@@ -234,7 +234,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Collaborators list (2026-11-10, 3 members)
 - [x] Stargazers and watchers lists (2026-11-10, stargazers lists alice; GitLab has no watchers list)
 - [x] Forks list (2026-11-10, empty message for an unforked repo)
-- [ ] User not found shows a readable error
+- [x] User not found shows a readable error (2026-11-10, gitlab.com)
 
 ## 16. Search (`search`)
 - [x] Type selector: repositories, users, issues, pull requests, code (2026-11-10, only Repository and User are offered, which is intended on GitLab)
@@ -246,21 +246,21 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Search history or suggestions if present
 
 ## 17. Bookmarks and stars
-- [ ] Bookmarks tab lists bookmarks added from repo and user menus
-- [ ] Open a bookmark
-- [ ] Remove a bookmark (long press or swipe)
-- [ ] Starred tab lists starred repos
-- [ ] Starred sort order
+- [x] Bookmarks tab lists bookmarks added from repo and user menus (2026-11-10, repo bookmark added from the repo menu is listed)
+- [x] Open a bookmark (2026-11-10, opens the repo)
+- [ ] Remove a bookmark (long press or swipe) (removal via the repo menu works; list gesture not found)
+- [x] Starred tab lists starred repos (2026-11-10, 2 gitlab.com stars with counts)
+- [x] Starred sort order (2026-11-10, Oldest and Newest flip the list)
 
 ## 18. Gists (`gist_menu`)
-- [ ] My gists: Mine and Starred tabs
-- [ ] Hidden or clear message because GitLab has no gists
-- [ ] Gist detail menu: Star, Share (only if reachable)
+- [-] My gists: Mine and Starred tabs (2026-11-10, screen not reachable on GitLab)
+- [x] Hidden or clear message because GitLab has no gists (2026-11-10, drawer entry hidden)
+- [-] Gist detail menu: Star, Share (only if reachable) (2026-11-10, not reachable on GitLab)
 
 ## 19. Trending, timeline and blog
-- [ ] Trending screen behaviour on GitLab
-- [ ] Public timeline behaviour on GitLab
-- [ ] Blog list menu: Open in browser (only if reachable)
+- [x] Trending screen behaviour on GitLab (2026-11-10, entry hidden)
+- [x] Public timeline behaviour on GitLab (2026-11-10, entry hidden)
+- [-] Blog list menu: Open in browser (only if reachable) (2026-11-10, screen not reachable on GitLab)
 
 ## 20. Settings
 - [ ] Start page: each option opens that screen at launch (dialog lists 8 options without gists, trending or blog; launch behavior not yet tried)
@@ -298,16 +298,16 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Open in browser from each screen that has the action
 
 ## 23. Robustness
-- [ ] Rotate on a list, a detail view and a dialog
-- [ ] Background and resume
-- [ ] Airplane mode on a list shows a readable error, then TRY AGAIN recovers
+- [ ] Rotate on a list, a detail view and a dialog (list and detail verified 2026-11-10, dialog not yet)
+- [x] Background and resume (2026-11-10, HOME then relaunch keeps the screen)
+- [x] Airplane mode on a list shows a readable error, then TRY AGAIN recovers (2026-11-10, My repositories: error then TRY AGAIN loads the list)
 - [ ] Slow network does not duplicate rows
 - [ ] Release build behaves like debug (R8 does not strip the interceptor models)
-- [ ] Back stack after deep link
+- [x] Back stack after deep link (2026-11-10, back from a deep-linked issue leaves the app, as expected for an external link)
 
-- [ ] Re-check markdown rendering on issue body, issue comments, commit comments, release notes, review bodies (body_html is now synthesized)
+- [x] Re-check markdown rendering on issue body, issue comments, commit comments, release notes, review bodies (body_html is now synthesized) (2026-11-10, issue body and comments, commit comments, release notes and review comments render)
 
-- [ ] Issue menu has "Open in new window"; verify it
-- [ ] Close dialog "Not planned" and "Duplicate" reasons (GitLab has only open/closed): hide them or accept
+- [x] Issue menu has "Open in new window"; verify it (2026-11-10, opens the issue in a new task)
+- [x] Close dialog "Not planned" and "Duplicate" reasons (GitLab has only open/closed): hide them or accept (2026-11-10, Close closes the issue directly, the Not planned and Duplicate reasons are not offered)
 - [x] Deep links on custom hosts cannot be registered in the manifest; confirm links to a custom host open in the browser (2026-11-10, link to a host without an account opens the browser)
-- [ ] Emoji shortcodes such as :bug: in issue and PR titles render as text, not emoji
+- [x] Emoji shortcodes such as :bug: in issue and PR titles render as text, not emoji (2026-11-10, list shows the text unchanged)

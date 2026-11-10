@@ -571,13 +571,15 @@ final class GitLabRoutes {
             String sort = c.q("sort");
             String order = "stars".equals(sort) ? "star_count" : "forks".equals(sort)
                     ? "forks_count" : "updated".equals(sort) ? "last_activity_at" : "similarity";
-            Up up = c.getPaged("/projects", "search", q == null ? "" : q, "search_namespaces",
-                    "true", "order_by", "similarity".equals(order) && (q == null || q.isEmpty())
-                            ? "last_activity_at" : order,
-                    "sort", "asc".equals(c.q("order")) ? "asc" : "desc");
-            if (up.ok() && up.arr().length() == 0 && q != null && !q.isEmpty() && c.page() == 1) {
-                // gitlab.com answers an expensive search that times out with an empty list.
+            Up up;
+            if ("similarity".equals(order) && q != null && !q.isEmpty()) {
+                // Ordering by similarity and searching namespaces makes gitlab.com time out
+                // (500, or an empty list), the plain search answers in about a second.
                 up = c.getPaged("/projects", "search", q);
+            } else {
+                up = c.getPaged("/projects", "search", q == null ? "" : q, "order_by",
+                        "similarity".equals(order) ? "last_activity_at" : order,
+                        "sort", "asc".equals(c.q("order")) ? "asc" : "desc");
             }
             if (!up.ok()) {
                 return c.error(up);
