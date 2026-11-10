@@ -271,8 +271,8 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Animated GIF loading dialog lists three options (2026-11-10, Don't load, Only load on Wifi, Load always)
 - [x] Sync interval dialog (2026-11-10, seven options from 15 minutes to 6 hours)
 - [ ] Text size and GIF choice take effect in a file view and a markdown image
-- [ ] About dialog
-- [ ] Open source components list
+- [x] About dialog (2026-11-10, TanukiDroid text, repository link, Report an issue and Source Code buttons)
+- [x] Open source components list (2026-11-10, list with library names and URLs)
 - [x] Settings persist after restart (2026-11-10, Night theme kept after force-stop)
 - [ ] Theme and dark mode follow the system
 
@@ -294,7 +294,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] File URL on a branch
 - [x] User and org URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
 - [ ] Release URL
-- [ ] Share text into the app
+- [-] Share text into the app (2026-11-10, the app has no SEND handler, as upstream)
 - [ ] Open in browser from each screen that has the action
 
 ## 23. Robustness
