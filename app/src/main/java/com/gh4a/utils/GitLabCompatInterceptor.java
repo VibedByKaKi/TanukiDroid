@@ -293,6 +293,10 @@ public class GitLabCompatInterceptor implements Interceptor {
         }
 
         Response reply(int code, String body) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "reply " + code + " for " + request.url().encodedPath() + ": "
+                        + (body.length() > 3000 ? body.substring(0, 3000) + "..." : body));
+            }
             return new Response.Builder()
                     .request(request)
                     .protocol(Protocol.HTTP_1_1)

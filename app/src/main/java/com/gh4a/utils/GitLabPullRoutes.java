@@ -267,8 +267,28 @@ final class GitLabPullRoutes {
 
     // ---------------------------------------------------------------- reviews
 
+    /**
+     * A discussion becomes a review named after its first note. The app keys rendered bodies by
+     * id, so the review must not share the id of that note.
+     */
+    private static final long REVIEW_ID_OFFSET = 1L << 40;
+
     private static void registerReviews() {
-        route("GET", "repos/{owner}/{repo}/pulls/{number}/reviews", c -> {
+        route("GET", "repos/{owner}/{repo}/pulls/{number}/reviews", c -> c.json(reviewList(c)));
+        route("GET", "repos/{owner}/{repo}/pulls/{number}/reviews/{id}", c -> {
+            JSONArray all = reviewList(c);
+            for (int i = 0; i < all.length(); i++) {
+                if (String.valueOf(all.optJSONObject(i).optLong("id")).equals(c.p("id"))) {
+                    return c.json(all.optJSONObject(i));
+                }
+            }
+            return c.notFound("No review");
+        });
+        registerReviewRoutes();
+    }
+
+    private static JSONArray reviewList(Ctx c) throws IOException {
+        {
             Up up = c.get(mr(c) + "/notes", "sort", "asc", "order_by", "created_at",
                     "per_page", "100");
             JSONArray in = up.arr();
@@ -285,6 +305,7 @@ final class GitLabPullRoutes {
                     continue;
                 }
                 JSONObject r = review(first, "COMMENTED");
+                put(r, "id", first.optLong("id") + REVIEW_ID_OFFSET);
                 put(r, "commit_id", str(first.optJSONObject("position"), "head_sha"));
                 out.put(r);
             }
@@ -304,11 +325,43 @@ final class GitLabPullRoutes {
                     out.put(review(n, state));
                 }
             }
+            return out;
+        }
+    }
+
+    private static void registerReviewRoutes() {
+        route("GET", "repos/{owner}/{repo}/pulls/{number}/reviews/{id}/comments", c -> {
+            // A review is one diff discussion here, named after its first note.
+            long reviewId = Long.parseLong(c.p("id")) - REVIEW_ID_OFFSET;
+            Up mrUp = c.get(mr(c));
+            String sha = mrUp.ok() ? str(mrUp.obj(), "sha") : null;
+            Up up = c.get(mr(c) + "/discussions", "per_page", "100");
+            if (!up.ok()) {
+                return c.error(up);
+            }
+            long mrIid = iid(number(c));
+            GitLabReactions.Result reactions = GitLabReactions.load(c, true, mrIid);
+            JSONArray in = up.arr();
+            JSONArray out = new JSONArray();
+            for (int i = 0; i < in.length(); i++) {
+                JSONObject d = in.optJSONObject(i);
+                JSONArray notes = d.optJSONArray("notes");
+                if (notes == null || notes.length() == 0
+                        || notes.optJSONObject(0).optLong("id") != reviewId) {
+                    continue;
+                }
+                JSONObject first = notes.optJSONObject(0);
+                for (int k = 0; k < notes.length(); k++) {
+                    JSONObject n = notes.optJSONObject(k);
+                    GitLabIssueRoutes.remember(c, n.optLong("id"), true, mrIid, str(d, "id"));
+                    JSONObject rc = reviewComment(c, n, first, sha);
+                    GitLabIssueRoutes.applyReactions(rc, reactions, n.optLong("id"));
+                    out.put(rc);
+                }
+            }
+            GitLabHtml.attach(c, out, c.p("owner") + "/" + c.p("repo"));
             return c.json(out);
         });
-        route("GET", "repos/{owner}/{repo}/pulls/{number}/reviews/{id}", c -> c.notFound("No review"));
-        route("GET", "repos/{owner}/{repo}/pulls/{number}/reviews/{id}/comments",
-                c -> c.json(new JSONArray()));
         route("POST", "repos/{owner}/{repo}/pulls/{number}/reviews", c -> {
             JSONObject in = c.bodyJson();
             String event = str(in, "event");
@@ -528,7 +581,7 @@ final class GitLabPullRoutes {
         if (!first.equals(n) && first.optLong("id") != n.optLong("id")) {
             put(o, "in_reply_to_id", first.optLong("id"));
         }
-        put(o, "pull_request_review_id", first.optLong("id"));
+        put(o, "pull_request_review_id", first.optLong("id") + REVIEW_ID_OFFSET);
         return o;
     }
 

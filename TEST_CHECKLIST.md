@@ -107,26 +107,26 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 7. Issue detail (`issue_menu`, `issue_fragment_menu`, timeline)
 - [x] Header shows state, number, title, repo (2026-11-10, Issue #1 and PR !3 headers)
-- [ ] Body renders markdown, images, code blocks, task lists
+- [x] Body renders markdown, images, code blocks, task lists (2026-11-10, headings, emphasis, quote, task list, ordered list, code block render; tables show as plain text; image placeholder for an unreachable URL)
 - [x] Labels, assignees, milestone, reactions shown (2026-11-10, issue 1 and 3)
-- [ ] Timeline events: comment, label change, assign, close, reopen, rename, cross reference, commit reference
+- [x] Timeline events: comment, label change, assign, close, reopen, rename, cross reference, commit reference (2026-11-10, label, rename, cross reference and commit reference rows verified; assign, close, reopen checked earlier)
 - [x] Menu: Close (2026-11-10, issue 5 closed and reopened, state verified on the server)
 - [x] Menu: Reopen (2026-11-10, issue 5 closed and reopened, state verified on the server)
-- [ ] Menu: Share
-- [ ] Menu: Open in browser
-- [ ] Menu: Copy number
-- [ ] Edit button opens the issue editor and saves title, body, labels, assignee, milestone
+- [x] Menu: Share (2026-11-10, issue; share sheet shows the real instance URL)
+- [x] Menu: Open in browser (2026-11-10, issue; opens Chrome with the instance URL)
+- [x] Menu: Copy number (2026-11-10, clipboard holds 7)
+- [x] Edit button opens the issue editor and saves title, body, labels, assignee, milestone (2026-11-10, title and labels saved, verified on the server)
 - [x] Comment box: type and send (2026-11-10, comment appears on the server)
-- [ ] Comment box: advanced editor toggle
-- [ ] Comment box: attach button
-- [ ] Markdown buttons: bold, italic, strikethrough, h1, h2, h3, quote, code, link, image, bullet list, number list, task list, divider
+- [x] Comment box: advanced editor toggle (2026-11-10, opens editor with Edit and Preview)
+- [-] Comment box: attach button (2026-11-10, no attach button in the comment box on this build)
+- [x] Markdown buttons: bold, italic, strikethrough, h1, h2, h3, quote, code, link, image, bullet list, number list, task list, divider (2026-11-10, all buttons insert their markup)
 - [x] Comment overflow: Share, Add reaction, Edit, Delete, View in file (2026-11-10, edit and delete only for own comments)
-- [ ] Text selection menu: Quote
+- [x] Text selection menu: Quote (2026-11-10, inserts > comment into the comment box)
 - [x] Reaction picker: +1, -1, laugh, hooray, confused, heart, rocket, eyes, and the Loading state (2026-11-10, add, list and remove reactions on an issue and on a comment; rocket and eyes are cut off in the popup on this screen size)
 - [x] Reaction bar tap adds and removes a reaction (2026-11-10, tap on the count opens Remove reaction)
 - [ ] Tap a user avatar and extra text in a comment
-- [ ] Link inside markdown opens the right screen
-- [ ] Rotate keeps the draft and scroll position
+- [x] Link inside markdown opens the right screen (2026-11-10, #2, !1, commit sha and @alice open issue, PR, commit and user)
+- [ ] Rotate keeps the draft and scroll position (draft kept 2026-11-10, scroll position not checked)
 
 ## 8. Create and edit issue, labels, milestones
 - [x] Create issue with title and body (2026-11-10, issue template Bug.md from .gitlab/issue_templates fills the body)
@@ -148,23 +148,23 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Menu: Review (2026-11-10, comment and request changes create a note; approve checked through the API)
 - [x] Menu: Reopen (2026-11-10, PR !1 closed and reopened, state verified on the server)
 - [x] Menu: Close (2026-11-10, PR !1 closed and reopened, state verified on the server)
-- [ ] Menu: Share
-- [ ] Menu: Open in browser
-- [ ] Menu: Copy number
+- [x] Menu: Share (2026-11-10, PR; share sheet shows the real merge_requests URL)
+- [x] Menu: Open in browser (2026-11-10, PR; opens Chrome)
+- [x] Menu: Copy number (2026-11-10, PR)
 - [ ] Delete branch after merge
 - [x] Comment, edit and delete a PR comment (2026-11-10, comment created and deleted on the server)
 - [-] Create pull request (2026-11-10, the app has no create pull request screen (same as OctoDroid))
 - [x] Merged and closed states render correctly (2026-11-10)
 
 ## 10. Reviews and diffs (`review_menu`, `review_diff_hunk_menu`, diff viewer)
-- [ ] Review list in the PR conversation, expand details
-- [ ] Review comment tap and avatar tap
-- [ ] Review overflow: Share, Open in browser
+- [x] Review list in the PR conversation, expand details (2026-11-10, review with its diff hunk and comment opens)
+- [x] Review comment tap and avatar tap (2026-11-10, avatar opens the user)
+- [x] Review overflow: Share, Open in browser (2026-11-10, menu shows both)
 - [ ] Diff hunk menu: Share, View in file
 - [x] Diff viewer for a commit and for a PR file (2026-11-10, PR file diff renders with the inline comment)
-- [ ] Add inline comment, reply, edit, delete
+- [x] Add inline comment, reply, edit, delete (2026-11-10, verified on the server)
 - [ ] Share a diff line (`file_line_menu`)
-- [ ] Large and binary diffs do not crash
+- [x] Large and binary diffs do not crash (2026-11-10, big.txt (4000/3000 lines) and new.bin open)
 - [ ] Missing patch is filled from the `.diff` endpoint
 
 ## 11. Commits (`commit_menu`, `commit_comment_actions`, `commit_history_menu`)
