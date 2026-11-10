@@ -76,15 +76,15 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 5. My repositories and repository lists (`repo_list_menu`, `repo_filter_*`, `repo_sort`)
 - [x] My repositories list loads and paginates (2026-11-10, list loads; single page only on the test data)
-- [ ] Tap a repo
+- [x] Tap a repo (2026-11-10)
 - [ ] Search icon filters the list
-- [ ] Filter and Sort menu opens
-- [ ] Type filters for the logged-in user: All, Owner, Member, Public, Private, Sources, Forks, Watched
+- [x] Filter and Sort menu opens (2026-11-10, gitlab.com)
+- [x] Type filters for the logged-in user: All, Owner, Member, Public, Private, Sources, Forks, Watched (2026-11-10, gitlab.com; Watched is empty because GitLab has no watch list)
 - [ ] Type filters for another user: All, Owner, Member, Sources, Forks, Watched, Starred
 - [ ] Type filters for an org: All, Sources, Forks
-- [ ] Sort: name A-Z, name Z-A, oldest, newest, least recently pushed, most recently pushed
+- [x] Sort: name A-Z, name Z-A, oldest, newest, least recently pushed, most recently pushed (2026-11-10, gitlab.com)
 - [ ] Starred list sort order (`repo_starred_list_menu`): oldest, newest, least and most recently pushed
-- [ ] Private and fork badges render
+- [x] Private and fork badges render (2026-11-10, gitlab.com)
 - [ ] Repository list from a user profile, an org profile, a starred list, a forks list
 
 ## 6. Issue lists (`issue_list_menu`, `issue_list_filter*`, `issue_list_sort`)
@@ -237,10 +237,10 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] User not found shows a readable error
 
 ## 16. Search (`search`)
-- [ ] Type selector: repositories, users, issues, pull requests, code
-- [ ] Submit search with keyboard and with the search icon
-- [ ] Open a result of each type
-- [ ] Empty result message
+- [x] Type selector: repositories, users, issues, pull requests, code (2026-11-10, only Repository and User are offered, which is intended on GitLab)
+- [x] Submit search with keyboard and with the search icon (2026-11-10, keyboard submit)
+- [x] Open a result of each type (2026-11-10, repo and user results open on gitlab.com; issue, PR and code types are not offered)
+- [x] Empty result message (2026-11-10, gitlab.com users)
 - [ ] Exact user and org name search
 - [ ] Pagination
 - [ ] Search history or suggestions if present

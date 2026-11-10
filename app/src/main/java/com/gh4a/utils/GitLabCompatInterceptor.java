@@ -259,6 +259,10 @@ public class GitLabCompatInterceptor implements Interceptor {
             Response r = chain.proceed(rb.build());
             try (ResponseBody rbod = r.body()) {
                 byte[] bytes = rbod != null ? rbod.bytes() : new byte[0];
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, method + " " + target + " -> " + r.code() + ", "
+                            + bytes.length + " bytes");
+                }
                 return new Up(r.code(), bytes, r.headers());
             }
         }

@@ -565,13 +565,20 @@ final class GitLabRoutes {
 
     private static void registerSearch() {
         route("GET", "search/repositories", c -> {
-            String q = c.q("q");
+            // GitHub qualifiers such as "fork:true" or "user:x" mean nothing to GitLab search.
+            String q = c.q("q") == null ? null
+                    : c.q("q").replaceAll("(^|\\s)[A-Za-z-]+:\\S*", " ").trim();
             String sort = c.q("sort");
             String order = "stars".equals(sort) ? "star_count" : "forks".equals(sort)
                     ? "forks_count" : "updated".equals(sort) ? "last_activity_at" : "similarity";
             Up up = c.getPaged("/projects", "search", q == null ? "" : q, "search_namespaces",
-                    "true", "order_by", "similarity".equals(order) ? "last_activity_at" : order,
+                    "true", "order_by", "similarity".equals(order) && (q == null || q.isEmpty())
+                            ? "last_activity_at" : order,
                     "sort", "asc".equals(c.q("order")) ? "asc" : "desc");
+            if (up.ok() && up.arr().length() == 0 && q != null && !q.isEmpty() && c.page() == 1) {
+                // gitlab.com answers an expensive search that times out with an empty list.
+                up = c.getPaged("/projects", "search", q);
+            }
             if (!up.ok()) {
                 return c.error(up);
             }
