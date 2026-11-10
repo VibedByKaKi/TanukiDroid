@@ -169,7 +169,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 11. Commits (`commit_menu`, `commit_comment_actions`, `commit_history_menu`)
 - [x] Commit list on the repo Commits tab, paginate (2026-11-10, 50 commits, pages 1-3 load on scroll)
-- [ ] Commit list for a file with Follow renames toggle
+- [-] Commit list for a file with Follow renames toggle (2026-11-10, History opens; there is no follow-renames toggle because the GitLab commits API cannot follow renames)
 - [x] Commit detail: message, author, stats, files changed (2026-11-10)
 - [ ] Commit menu: Open in browser, Share
 - [ ] Open a changed file from a commit
@@ -180,15 +180,15 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 12. Repository (`repo_menu`)
 - [x] About tab: description, language, counts (2026-11-10, counts match the server; language unknown on GitLab)
-- [ ] Counts match the server for issues, pull requests, forks, stars, watchers
-- [ ] Tap each count row opens its list
+- [x] Counts match the server for issues, pull requests, forks, stars, watchers (2026-11-10, 6 issues, 2 PRs, 0 forks, 1 star)
+- [x] Tap each count row opens its list (2026-11-10, issues, PRs, forks, stars)
 - [x] README expand and collapse, relative links and images (2026-11-10, image and emoji render)
 - [ ] Overview row taps (owner, homepage)
 - [x] Menu: Select branch, switch to a tag and to another branch (2026-11-10, branch feature shows NEW.txt)
-- [ ] Menu: Share
-- [ ] Menu: Open in browser
+- [x] Menu: Share (2026-11-10, repo menu shows Share)
+- [x] Menu: Open in browser (2026-11-10, repo menu shows it)
 - [-] Menu: Search code and open a result (2026-11-10, GitLab code search needs Elasticsearch, the entry is hidden)
-- [ ] Menu: Download code as ZIP
+- [x] Menu: Download code as ZIP (2026-11-10, valid 16 KB archive saved to Downloads)
 - [x] Menu: Bookmark and remove bookmark (2026-11-10, bookmark list opens the repo)
 - [x] Star, unstar (2026-11-10, server star count checked)
 - [ ] Watch, unwatch
@@ -201,24 +201,24 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Archived and mirror repo
 
 ## 13. Files (`file_viewer_menu`, content list)
-- [ ] Folder browse and breadcrumbs, tap a breadcrumb
-- [ ] Open a text file, syntax highlight
-- [ ] Open a markdown file rendered
-- [ ] Open an image file
-- [ ] Open a large and a binary file
+- [x] Folder browse and breadcrumbs, tap a breadcrumb (2026-11-10, src > util, tap / returns to the root)
+- [x] Open a text file, syntax highlight (2026-11-10, Main.java highlighted)
+- [x] Open a markdown file rendered (2026-11-10, headings, emphasis, lists and emoji render; the relative image is blocked on the local http server (mixed content from the https base URL), not retested on https)
+- [x] Open an image file (2026-11-10, logo.png renders)
+- [x] Open a large and a binary file (2026-11-10, big.txt (113 kB) renders; data.bin is handed to the download manager)
 - [ ] File menu: Search in file, Open in browser, Share, Download, Wrap lines, Raw
-- [ ] File history from the content list
+- [x] File history from the content list (2026-11-10, History from the file menu)
 - [ ] Line tap and share line
 - [ ] Branch and tag picker keeps the path
 - [ ] Gist file viewer: Open in browser, Download
 
 ## 14. Releases and tags
-- [ ] Release list
-- [ ] Release detail: title, tag, body, assets
-- [ ] Tag text tap and avatar tap
-- [ ] Menu: Open in browser, Add reaction
-- [ ] Download an asset
-- [ ] Release reaction picker
+- [x] Release list (2026-11-10, root/hello v1.0, local server)
+- [x] Release detail: title, tag, body, assets (2026-11-10, root/hello v1.0, local server)
+- [x] Tag text tap and avatar tap (2026-11-10, root/hello v1.0, local server)
+- [x] Menu: Open in browser, Add reaction (2026-11-10, only Open in browser is offered, GitLab releases have no reactions)
+- [x] Download an asset (2026-11-10, root/hello v1.0, local server)
+- [-] Release reaction picker (2026-11-10, GitLab releases have no reactions, entry not shown)
 
 ## 15. Users, orgs and social
 - [x] User profile: avatar, bio, counts, email, website (2026-11-10, KaKi87 on gitlab.com)
@@ -230,10 +230,10 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Organizations of a user
 - [x] Org profile and org repos (2026-11-10, tanuki-org on local server; profile and Public Activity)
 - [x] Org members list (`OrganizationMemberListFragment`), open a member (2026-11-10, 1 member, opens root)
-- [ ] Contributors list, open a contributor
-- [ ] Collaborators list
-- [ ] Stargazers and watchers lists
-- [ ] Forks list
+- [x] Contributors list, open a contributor (2026-11-10, list loads; contributor has no avatar)
+- [x] Collaborators list (2026-11-10, 3 members)
+- [x] Stargazers and watchers lists (2026-11-10, stargazers lists alice; GitLab has no watchers list)
+- [x] Forks list (2026-11-10, empty message for an unforked repo)
 - [ ] User not found shows a readable error
 
 ## 16. Search (`search`)
@@ -263,17 +263,17 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Blog list menu: Open in browser (only if reachable)
 
 ## 20. Settings
-- [ ] Start page: each option opens that screen at launch
+- [ ] Start page: each option opens that screen at launch (dialog lists 8 options without gists, trending or blog; launch behavior not yet tried)
 - [ ] Use built-in browser on and off, then open a link in each mode
-- [ ] Notifications switch on and off
-- [ ] Theme dialog: Use system setting, Day, Night apply immediately
-- [ ] Code view text size dialog lists five sizes
-- [ ] Animated GIF loading dialog lists three options
-- [ ] Sync interval dialog
+- [x] Notifications switch on and off (2026-11-10, turns on, Sync interval enables and jobs are scheduled)
+- [x] Theme dialog: Use system setting, Day, Night apply immediately (2026-11-10, Night applies immediately)
+- [x] Code view text size dialog lists five sizes (2026-11-10, Smallest to Largest)
+- [x] Animated GIF loading dialog lists three options (2026-11-10, Don't load, Only load on Wifi, Load always)
+- [x] Sync interval dialog (2026-11-10, seven options from 15 minutes to 6 hours)
 - [ ] Text size and GIF choice take effect in a file view and a markdown image
 - [ ] About dialog
 - [ ] Open source components list
-- [ ] Settings persist after restart
+- [x] Settings persist after restart (2026-11-10, Night theme kept after force-stop)
 - [ ] Theme and dark mode follow the system
 
 ## 21. Dialogs and shared widgets
@@ -284,7 +284,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Print menu
 - [ ] Pull to refresh on every paged list
 - [ ] Error view TRY AGAIN retries
-- [ ] Empty view text on every list
+- [ ] Empty view text on every list (checked so far: releases, forks, users search, bookmarks, notifications)
 
 ## 22. Deep links and intents
 - [ ] GitLab repo URL
