@@ -70,6 +70,10 @@ import androidx.core.content.ContextCompat;
 import static android.graphics.Paint.Style.FILL;
 
 public class HtmlUtils {
+    /** Table cells have no grid in a text view, so mark the borders with box characters. */
+    private static final String TABLE_ROW_START = "\u2502\u2002";
+    private static final String TABLE_BORDER = "\u2002\u2502\u2002";
+
     public static void writeScriptInclude(StringBuilder builder, String scriptName) {
         builder.append("<script src='file:///android_asset/");
         builder.append(scriptName);
@@ -503,6 +507,8 @@ public class HtmlUtils {
                 appendVideoLink(attributes.getValue("src"));
             } else if (tag.equalsIgnoreCase("table")) {
                 appendNewlines(2);
+            } else if (tag.equalsIgnoreCase("tr")) {
+                mSpannableStringBuilder.append(TABLE_ROW_START);
             } else if (tag.equalsIgnoreCase("th")) {
                 start(new Bold());
             } else if (tag.equalsIgnoreCase("td")) {
@@ -587,10 +593,10 @@ public class HtmlUtils {
                     endCodeSnippetLine(codeMark);
                 }
             } else if (tag.equalsIgnoreCase("td")) {
-                mSpannableStringBuilder.append('\u2003');
+                mSpannableStringBuilder.append(TABLE_BORDER);
             } else if (tag.equalsIgnoreCase("th")) {
                 end(Bold.class, new StyleSpan(Typeface.BOLD));
-                mSpannableStringBuilder.append('\u2003');
+                mSpannableStringBuilder.append(TABLE_BORDER);
             }
         }
 
