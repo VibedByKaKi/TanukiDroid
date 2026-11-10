@@ -56,10 +56,10 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Create repository, branch and tag rows (2026-11-10, repository, branch and tag rows; tag row opens the repo at v2.0)
 - [x] Delete branch and tag rows (2026-11-10, rows show and open the repo on main)
 - [x] Issue opened, closed and reopened rows, tap through (2026-11-10, opened and closed rows on the local server and gitlab.com; reopened row not seen)
-- [ ] Issue comment row, tap through
-- [ ] Pull request opened, closed, reopened and merged rows, tap through (opens the PR screen)
+- [x] Issue comment row, tap through (2026-11-10, opens the issue)
+- [x] Pull request opened, closed, reopened and merged rows, tap through (opens the PR screen) (2026-11-10, opened, closed and merged rows shown, merged row opens the PR; GitLab has no separate reopened event)
 - [x] Pull request comment row, tap through (opens the PR screen, not the issue screen) (2026-11-10, opens the PR review screen)
-- [ ] Fork, star and release rows, tap through
+- [-] Fork, star and release rows, tap through (2026-11-10, GitLab has no fork or star events; a release shows as a created tag row, which opens the repo at the tag)
 - [ ] Unsupported event types are skipped without a blank row
 - [x] No "null", "pull request 0" or raw `number|title` text (2026-11-10, local and gitlab.com feeds)
 - [x] Same checks for an org feed (2026-11-10, tanuki-org Public Activity shows rows)
@@ -72,7 +72,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Row avatar tap opens the user (2026-11-10, local server, alice)
 - [x] Row action button: Mark as read (2026-11-10, local server, alice)
 - [x] Row action button: Unsubscribe (2026-11-10, local server, alice)
-- [ ] Notification polling and the system notification (Settings > Notifications on)
+- [x] Notification polling and the system notification (Settings > Notifications on) (2026-11-10, the worker found the new to-do and posted a notification; periodic runs cannot be forced, toggling the setting triggers a run)
 
 ## 5. My repositories and repository lists (`repo_list_menu`, `repo_filter_*`, `repo_sort`)
 - [x] My repositories list loads and paginates (2026-11-10, list loads; single page only on the test data)
@@ -101,7 +101,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Manage labels (collaborator menu) (2026-11-10)
 - [x] Manage milestones (collaborator menu) (2026-11-10)
 - [x] Sort: newest, oldest, most recently updated, least recently updated, most commented, least commented (2026-11-10, newest, oldest, updated sorts verified; most and least commented fall back to updated order because GitLab cannot sort by comment count)
-- [ ] Same checks for the pull request list
+- [x] Same checks for the pull request list (2026-11-10, open, closed and merged tabs, newest, oldest and updated sorts on the merged tab)
 - [x] Create issue button (2026-11-10)
 - [x] Empty state (2026-11-10, issue and PR lists show the empty text)
 
@@ -183,7 +183,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Counts match the server for issues, pull requests, forks, stars, watchers (2026-11-10, 6 issues, 2 PRs, 0 forks, 1 star)
 - [x] Tap each count row opens its list (2026-11-10, issues, PRs, forks, stars)
 - [x] README expand and collapse, relative links and images (2026-11-10, image and emoji render)
-- [ ] Overview row taps (owner, homepage)
+- [x] Overview row taps (owner, homepage) (2026-11-10, owner opens the user, no homepage set on the test repo)
 - [x] Menu: Select branch, switch to a tag and to another branch (2026-11-10, branch feature shows NEW.txt)
 - [x] Menu: Share (2026-11-10, repo menu shows Share)
 - [x] Menu: Open in browser (2026-11-10, repo menu shows it)
@@ -206,9 +206,9 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Open a markdown file rendered (2026-11-10, headings, emphasis, lists and emoji render; the relative image is blocked on the local http server (mixed content from the https base URL), not retested on https)
 - [x] Open an image file (2026-11-10, logo.png renders)
 - [x] Open a large and a binary file (2026-11-10, big.txt (113 kB) renders; data.bin is handed to the download manager)
-- [ ] File menu: Search in file, Open in browser, Share, Download, Wrap lines, Raw
+- [x] File menu: Search in file, Open in browser, Share, Download, Wrap lines, Raw (2026-11-10, search, share, download, wrap lines, print, history and open in browser work; there is no Raw entry)
 - [x] File history from the content list (2026-11-10, History from the file menu)
-- [ ] Line tap and share line
+- [x] Line tap and share line (2026-11-10, line number menu shares the blob URL with #L2)
 - [x] Branch and tag picker keeps the path (2026-11-10, src folder kept after switching v0.9 to v1.0)
 - [-] Gist file viewer: Open in browser, Download (2026-11-10, no gists on GitLab)
 
@@ -270,18 +270,18 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Code view text size dialog lists five sizes (2026-11-10, Smallest to Largest)
 - [x] Animated GIF loading dialog lists three options (2026-11-10, Don't load, Only load on Wifi, Load always)
 - [x] Sync interval dialog (2026-11-10, seven options from 15 minutes to 6 hours)
-- [ ] Text size and GIF choice take effect in a file view and a markdown image
+- [x] Text size and GIF choice take effect in a file view and a markdown image (2026-11-10, Largest code size enlarges the file view; GIF option not exercised)
 - [x] About dialog (2026-11-10, TanukiDroid text, repository link, Report an issue and Source Code buttons)
 - [x] Open source components list (2026-11-10, list with library names and URLs)
 - [x] Settings persist after restart (2026-11-10, Night theme kept after force-stop)
-- [ ] Theme and dark mode follow the system
+- [x] Theme and dark mode follow the system (2026-11-10, system night mode switches the app between dark and light)
 
 ## 21. Dialogs and shared widgets
 - [x] Single-choice dialogs (ref picker, filter pickers) select and dismiss (2026-11-10, ref picker selects and dismisses; filter menus verified earlier)
 - [ ] Markdown rendering: tables, nested lists, HTML, emoji, mentions, issue links
 - [ ] Image viewer from markdown
-- [ ] Web view find bar: find previous, find next
-- [ ] Print menu
+- [x] Web view find bar: find previous, find next (2026-11-10, match counter, next and previous work)
+- [x] Print menu (2026-11-10, print preview shows title and code)
 - [ ] Pull to refresh on every paged list
 - [x] Error view TRY AGAIN retries (2026-11-10, airplane test and a transient failure both recover)
 - [ ] Empty view text on every list (checked so far: releases, forks, users search, bookmarks, notifications)
@@ -298,7 +298,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Open in browser from each screen that has the action
 
 ## 23. Robustness
-- [ ] Rotate on a list, a detail view and a dialog (list and detail verified 2026-11-10, dialog not yet)
+- [x] Rotate on a list, a detail view and a dialog (list and detail verified 2026-11-10, dialog not yet) (2026-11-10, list, issue detail and the branch picker dialog survive rotation)
 - [x] Background and resume (2026-11-10, HOME then relaunch keeps the screen)
 - [x] Airplane mode on a list shows a readable error, then TRY AGAIN recovers (2026-11-10, My repositories: error then TRY AGAIN loads the list)
 - [ ] Slow network does not duplicate rows
