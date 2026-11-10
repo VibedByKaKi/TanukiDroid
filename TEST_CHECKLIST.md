@@ -145,7 +145,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Commits tab, open a commit (2026-11-10)
 - [x] Files tab, open a file diff (2026-11-10)
 - [x] Menu: Merge (all merge styles GitLab offers) (2026-11-10, merged !4 and !5 as maintainer; non-maintainer gets a 403 message)
-- [x] Menu: Review (2026-11-10, comment and request changes create a note; approve checked through the API)
+- [x] Menu: Review (2026-11-10, comment, request changes and approve from the app; the approval shows as a review row and on the server)
 - [x] Menu: Reopen (2026-11-10, PR !1 closed and reopened, state verified on the server)
 - [x] Menu: Close (2026-11-10, PR !1 closed and reopened, state verified on the server)
 - [x] Menu: Share (2026-11-10, PR; share sheet shows the real merge_requests URL)
