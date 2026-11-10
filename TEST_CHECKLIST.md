@@ -165,7 +165,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Add inline comment, reply, edit, delete (2026-11-10, verified on the server)
 - [x] Share a diff line (`file_line_menu`) (2026-11-10, shares a GitLab line code anchor (sha1 of the path plus old and new position); opening that link highlights the line)
 - [x] Large and binary diffs do not crash (2026-11-10, big.txt (4000/3000 lines) and new.bin open)
-- [ ] Missing patch is filled from the `.diff` endpoint
+- [-] Missing patch is filled from the `.diff` endpoint (2026-11-10, the app never requests a .diff, GitLab returns patches in the file list)
 
 ## 11. Commits (`commit_menu`, `commit_comment_actions`, `commit_history_menu`)
 - [x] Commit list on the repo Commits tab, paginate (2026-11-10, 50 commits, pages 1-3 load on scroll)
@@ -301,7 +301,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Rotate on a list, a detail view and a dialog (list and detail verified 2026-11-10, dialog not yet) (2026-11-10, list, issue detail and the branch picker dialog survive rotation)
 - [x] Background and resume (2026-11-10, HOME then relaunch keeps the screen)
 - [x] Airplane mode on a list shows a readable error, then TRY AGAIN recovers (2026-11-10, My repositories: error then TRY AGAIN loads the list)
-- [ ] Slow network does not duplicate rows
+- [x] Slow network does not duplicate rows (2026-11-10, feed under emulated GSM speed and GPRS delay, no duplicated rows)
 - [ ] Release build behaves like debug (R8 does not strip the interceptor models)
 - [x] Back stack after deep link (2026-11-10, back from a deep-linked issue leaves the app, as expected for an external link)
 
