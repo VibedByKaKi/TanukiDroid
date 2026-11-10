@@ -296,8 +296,17 @@ public class ApiHelpers {
     private final static char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
     public static String sha256Of(String input) {
+        return digestHex("SHA-256", input);
+    }
+
+    /** GitLab names the anchor of a file in a diff after the SHA-1 of its path. */
+    public static String sha1Of(String input) {
+        return digestHex("SHA-1", input);
+    }
+
+    private static String digestHex(String algorithm, String input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
             byte[] messageDigest = digest.digest(input.getBytes());
             char[] hexChars = new char[messageDigest.length * 2];
             for ( int i = 0; i < messageDigest.length; i++ ) {

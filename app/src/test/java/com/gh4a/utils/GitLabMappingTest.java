@@ -285,4 +285,19 @@ public class GitLabMappingTest {
         IssueEvent parsed = parse(IssueEvent.class, ev);
         assertEquals("a", parsed.rename().from());
     }
+
+    @Test
+    public void diffAnchorsAreGitLabStyle() {
+        String mrNumber = String.valueOf(7 + GitLabCompatInterceptor.MR_OFFSET);
+        Uri commitInMr = Uri.parse("https://github.com/g/p/pull/" + mrNumber + "/commit/abc123");
+        Uri web = GitLabUrls.toWeb(commitInMr, "https://gitlab.com");
+        assertEquals("https://gitlab.com/g/p/-/merge_requests/7/diffs?commit_id=abc123",
+                web.toString());
+
+        String hash = ApiHelpers.sha1Of("src/x.java");
+        assertEquals(40, hash.length());
+        Uri line = Uri.parse("https://github.com/g/p/commit/abc123#" + hash + "_7_2");
+        assertEquals("https://gitlab.com/g/p/-/commit/abc123#" + hash + "_7_2",
+                GitLabUrls.toWeb(line, "https://gitlab.com").toString());
+    }
 }

@@ -48,6 +48,8 @@ import com.meisolsson.githubsdk.model.Reactions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Locale;
 
 import io.reactivex.Single;
@@ -498,8 +500,52 @@ public abstract class DiffViewerActivity<C extends PositionalCommentBase> extend
     protected abstract boolean canReply();
     protected abstract Uri createUrl(String lineId, long replyId);
 
-    private String createLineLinkId(int line, boolean isRight) {
-        return (isRight ? "R" : "L") + line;
+    /**
+     * GitLab line code of a patch line, {@code <old position>_<new position>}. Both positions
+     * are the ones the patch reaches at that line, so a removed line has the position of the
+     * next added line on the new side and an added line has that of the next removed line on
+     * the old side.
+     */
+    private String createLineLinkId(int position) {
+        int oldPos = 0;
+        int newPos = 0;
+        for (int i = 0; i <= position && i < mDiffLines.length; i++) {
+            String line = mDiffLines[i];
+            Matcher hunk = DIFF_HUNK.matcher(line);
+            if (hunk.find()) {
+                oldPos = Integer.parseInt(hunk.group(1));
+                newPos = Integer.parseInt(hunk.group(2));
+                if (i == position) {
+                    return "";
+                }
+                continue;
+            }
+            if (i == position) {
+                return oldPos + "_" + newPos;
+            }
+            char type = line.isEmpty() ? ' ' : line.charAt(0);
+            if (type == '+') {
+                newPos++;
+            } else if (type == '-') {
+                oldPos++;
+            } else if (type == ' ') {
+                oldPos++;
+                newPos++;
+            }
+        }
+        return "";
+    }
+
+    private static final Pattern DIFF_HUNK =
+            Pattern.compile("^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)(?:,\\d+)? @@");
+
+    /** Anchor of a file, a line or a comment on a GitLab diff page. */
+    protected final String createFragment(String lineId, long replyId) {
+        if (replyId > 0L) {
+            return "note_" + replyId;
+        }
+        String fileId = ApiHelpers.sha1Of(mPath);
+        return TextUtils.isEmpty(lineId) ? fileId : fileId + "_" + lineId;
     }
 
     private void deleteComment(long id) {
@@ -603,8 +649,7 @@ public abstract class DiffViewerActivity<C extends PositionalCommentBase> extend
                     openCommentDialog(0L, 0L, mLineText, mPosition, mLeftLine, mRightLine, null);
                     break;
                 case R.id.share:
-                    Uri url = createUrl(createLineLinkId(mIsRightLine ? mRightLine : mLeftLine,
-                            mIsRightLine), mId);
+                    Uri url = createUrl(createLineLinkId(mPosition), mId);
                     String subject = getString(R.string.share_commit_subject, mSha.substring(0, 7),
                             mRepoOwner + "/" + mRepoName);
                     IntentUtils.share(DiffViewerActivity.this, subject, url);

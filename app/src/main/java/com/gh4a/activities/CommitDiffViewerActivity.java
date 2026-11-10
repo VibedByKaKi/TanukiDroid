@@ -57,11 +57,7 @@ public class CommitDiffViewerActivity extends DiffViewerActivity<GitComment> {
         Uri.Builder builder = IntentUtils.createBaseUriForRepo(mRepoOwner, mRepoName)
                 .appendPath("commit")
                 .appendPath(mSha);
-        if (replyId > 0L) {
-            builder.fragment("r" + replyId);
-        } else {
-            builder.fragment("diff-" + ApiHelpers.sha256Of(mPath) + lineId);
-        }
+        builder.fragment(createFragment(lineId, replyId));
         return builder.build();
     }
 

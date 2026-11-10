@@ -33,6 +33,8 @@ import com.gh4a.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LinkParser {
     private static final List<String> RESERVED_NAMES = Arrays.asList(
@@ -429,8 +431,17 @@ public class LinkParser {
         return new ParseResult(CompareActivity.makeIntent(activity, user, repo, parts[0], parts[1]));
     }
 
+    private static final String GITLAB_NOTE_PREFIX = "note_";
+    private static final Pattern GITLAB_DIFF_ANCHOR =
+            Pattern.compile("([0-9a-f]{40})(?:_(\\d+)_(\\d+))?");
+
     private static IntentUtils.InitialCommentMarker generateInitialCommentMarkerWithoutFallback(
             String fragment, String prefix) {
+        if (fragment != null && fragment.startsWith(GITLAB_NOTE_PREFIX)
+                && ("issuecomment-".equals(prefix) || "commitcomment-".equals(prefix))) {
+            // GitLab links to a comment with #note_<id>
+            prefix = GITLAB_NOTE_PREFIX;
+        }
         if (fragment == null || !fragment.startsWith(prefix)) {
             return null;
         }
@@ -450,6 +461,20 @@ public class LinkParser {
     }
 
     private static DiffHighlightId extractDiffId(String fragment, String prefix) {
+        if ("diff-".equals(prefix) && fragment != null) {
+            // GitLab anchors are the SHA-1 of the file path, optionally with the old and new line
+            Matcher gitlab = GITLAB_DIFF_ANCHOR.matcher(fragment);
+            if (gitlab.matches()) {
+                if (gitlab.group(2) == null) {
+                    return new DiffHighlightId(gitlab.group(1), -1, -1, false);
+                }
+                int oldLine = Integer.parseInt(gitlab.group(2));
+                int newLine = Integer.parseInt(gitlab.group(3));
+                boolean right = newLine > 0;
+                int line = right ? newLine : oldLine;
+                return new DiffHighlightId(gitlab.group(1), line, line, right);
+            }
+        }
         if (fragment == null || !fragment.startsWith(prefix)) {
             return null;
         }

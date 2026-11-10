@@ -163,7 +163,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Diff hunk menu: Share, View in file
 - [x] Diff viewer for a commit and for a PR file (2026-11-10, PR file diff renders with the inline comment)
 - [x] Add inline comment, reply, edit, delete (2026-11-10, verified on the server)
-- [x] Share a diff line (`file_line_menu`) (2026-11-10, shares the commit URL; the GitHub style line anchor is ignored by GitLab)
+- [x] Share a diff line (`file_line_menu`) (2026-11-10, shares a GitLab line code anchor (sha1 of the path plus old and new position); opening that link highlights the line)
 - [x] Large and binary diffs do not crash (2026-11-10, big.txt (4000/3000 lines) and new.bin open)
 - [ ] Missing patch is filled from the `.diff` endpoint
 

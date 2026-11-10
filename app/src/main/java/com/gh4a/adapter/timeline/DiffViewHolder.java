@@ -229,7 +229,7 @@ class DiffViewHolder extends TimelineItemAdapter.TimelineItemViewHolder<Timeline
 
     private Uri createUrl(TimelineItem.Diff diff, int line, boolean isRightLine) {
         ReviewComment comment = diff.getInitialComment();
-        String fragment = "discussion-diff-" + comment.id() + (isRightLine ? "R" : "L") + line;
+        String fragment = "note_" + comment.id();
         return IntentUtils.createBaseUriForRepo(mRepoOwner, mRepoName)
                 .appendPath("pull")
                 .appendPath(String.valueOf(mIssueNumber))

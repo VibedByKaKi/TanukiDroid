@@ -83,11 +83,7 @@ public class PullRequestDiffViewerActivity extends DiffViewerActivity<ReviewComm
                 .appendPath("pull")
                 .appendPath(String.valueOf(mPullRequestNumber))
                 .appendPath("files");
-        if (replyId > 0L) {
-            builder.fragment("r" + replyId);
-        } else {
-            builder.fragment("diff-" + ApiHelpers.sha256Of(mPath) + lineId);
-        }
+        builder.fragment(createFragment(lineId, replyId));
         return builder.build();
     }
 

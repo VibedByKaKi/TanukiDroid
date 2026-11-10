@@ -191,7 +191,10 @@ public final class GitLabUrls {
                     } catch (NumberFormatException e) {
                         b.appendPath(segs.get(3));
                     }
-                    if (segs.size() >= 5) {
+                    if (segs.size() >= 6 && "commit".equals(segs.get(4))) {
+                        // A commit of a merge request is shown by its diffs page
+                        b.appendPath("diffs").appendQueryParameter("commit_id", segs.get(5));
+                    } else if (segs.size() >= 5) {
                         b.appendPath("files".equals(segs.get(4)) ? "diffs" : segs.get(4));
                     }
                 }
