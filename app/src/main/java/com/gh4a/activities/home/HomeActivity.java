@@ -521,6 +521,14 @@ public class HomeActivity extends BaseFragmentPagerActivity implements
             mLeftDrawerMenu.setGroupVisible(R.id.settings, !accountMode);
             mLeftDrawerMenu.setGroupVisible(R.id.account, accountMode);
             mLeftDrawerMenu.setGroupVisible(R.id.other_accounts, accountMode);
+            // setGroupVisible() also shows the entries that only exist on GitHub.
+            for (int hiddenId : new int[] { R.id.my_gists, R.id.pub_timeline, R.id.trend,
+                    R.id.blog }) {
+                MenuItem hidden = mLeftDrawerMenu.findItem(hiddenId);
+                if (hidden != null) {
+                    hidden.setVisible(false);
+                }
+            }
 
             if (accountMode) {
                 // repopulate other account list

@@ -1404,6 +1404,15 @@ final class GitLabIssueRoutes {
 
     private static final Pattern RENAME = Pattern.compile(
             "^changed title from \\*\\*(.*)\\*\\* to \\*\\*(.*)\\*\\*$", Pattern.DOTALL);
+    private static final Pattern HTML_RENAME = Pattern.compile(
+            "(?s)^<p>changed title from <code[^>]*>(.*?)</code> to <code[^>]*>(.*?)</code></p>$");
+    private static final Pattern COMMIT_MENTION = Pattern.compile("^mentioned in commit (\\w+)$");
+
+    private static String plainText(String html) {
+        return android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_LEGACY)
+                .toString().trim();
+    }
+
     private static final Pattern ASSIGNED = Pattern.compile("^assigned to (.*)$");
     private static final Pattern UNASSIGNED = Pattern.compile("^unassigned (.*)$");
     private static final Pattern MENTIONED_IN = Pattern.compile("^mentioned in (.*)$");
@@ -1434,6 +1443,19 @@ final class GitLabIssueRoutes {
             return null;
         }
         Matcher m;
+        if (body.startsWith("<p>")) {
+            // Title changes arrive as HTML with a diff of the old and the new title.
+            Matcher html = HTML_RENAME.matcher(body);
+            if (html.matches()) {
+                put(ev, "event", "renamed");
+                JSONObject rename = newObj();
+                put(rename, "from", plainText(html.group(1)));
+                put(rename, "to", plainText(html.group(2)));
+                put(ev, "rename", rename);
+                return ev;
+            }
+            body = plainText(body);
+        }
         if ("closed".equals(body) || body.startsWith("closed via")) {
             put(ev, "event", "closed");
         } else if ("reopened".equals(body)) {
@@ -1477,6 +1499,9 @@ final class GitLabIssueRoutes {
             put(ev, "event", "committed");
             put(ev, "message", body);
             put(ev, "sha", "");
+        } else if ((m = COMMIT_MENTION.matcher(body)).matches()) {
+            put(ev, "event", "referenced");
+            put(ev, "commit_id", m.group(1));
         } else if (body.startsWith("mentioned in")) {
             put(ev, "event", "referenced");
             put(ev, "commit_id", null);
