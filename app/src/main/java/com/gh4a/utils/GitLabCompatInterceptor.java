@@ -339,6 +339,8 @@ public class GitLabCompatInterceptor implements Interceptor {
             } catch (JSONException ignored) {
             }
             int code = up.code;
+            Log.w(TAG, "GitLab answered " + code + " for " + request.method() + " " + request.url().encodedPath()
+                    + ", WWW-Authenticate: " + up.headers.get("WWW-Authenticate") + ", body " + up.body);
             String auth = up.headers.get("WWW-Authenticate");
             if (code == 401 && request.header("PRIVATE-TOKEN") != null
                     && (auth == null || !auth.contains("invalid_token"))) {

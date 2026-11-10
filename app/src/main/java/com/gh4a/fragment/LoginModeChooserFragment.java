@@ -447,7 +447,8 @@ public class LoginModeChooserFragment extends DialogFragment {
             error = "Unreadable response: " + json;
         }
         if (!TextUtils.isEmpty(token)) {
-            Log.i(TAG, "Token created, fetching user");
+            Log.i(TAG, "Token created (" + token.length() + " chars, prefix "
+                    + token.substring(0, Math.min(5, token.length())) + "), fetching user");
             mOnTokenPage = false;
             // The token replaces the web session.
             CookieManager.getInstance().removeAllCookies(null);
@@ -514,9 +515,20 @@ public class LoginModeChooserFragment extends DialogFragment {
                 Single.fromCallable(() -> {
                             UserService userService = ServiceFactory.get(UserService.class, true,
                                     null, token, null, instance);
-                            return userService.getUser()
-                                    .map(ApiHelpers::throwOnFailure)
-                                    .blockingGet();
+                            // A fresh token is sometimes rejected for a moment on busy instances.
+                            for (int attempt = 1; ; attempt++) {
+                                try {
+                                    return userService.getUser()
+                                            .map(ApiHelpers::throwOnFailure)
+                                            .blockingGet();
+                                } catch (RuntimeException e) {
+                                    if (attempt >= 3) {
+                                        throw e;
+                                    }
+                                    Log.w(TAG, "Fetching user failed, retrying", e);
+                                    Thread.sleep(2000L * attempt);
+                                }
+                            }
                         })
                         .compose(RxUtils::doInBackground)
                         .subscribe(user -> {
