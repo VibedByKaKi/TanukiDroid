@@ -45,7 +45,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Settings (2026-11-10, drawer, gitlab.com)
 - [x] Add account, My profile, Logout from the header menu (2026-11-10, all three open or act)
 - [ ] Back from each screen returns to the previous one without leaving the app unexpectedly
-- [ ] Drawer swipe open and close, selected item is highlighted
+- [x] Drawer swipe open and close, selected item is highlighted (2026-11-10, Search is highlighted while open)
 
 ## 3. News Feed
 - [ ] Pull to refresh
@@ -195,10 +195,10 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Fork
 - [x] Other information: Contributors, Collaborators, Releases, Wiki (2026-11-10, all four screens load)
 - [x] Wiki list and a wiki page (hidden or clear message when the wiki is off) (2026-11-10, pages render as HTML)
-- [ ] Activity tab, open an item
-- [ ] Empty repo
+- [x] Activity tab, open an item (2026-11-10, Created a repository row opens the repo)
+- [x] Empty repo (2026-11-10, Files, Commits and Activity tabs show empty messages without errors)
 - [x] Private repo (2026-11-10, alice/secret listed and openable)
-- [ ] Archived and mirror repo
+- [x] Archived and mirror repo (2026-11-10, archived repo opens without errors (no archived badge is shown, mirrors not tested))
 
 ## 13. Files (`file_viewer_menu`, content list)
 - [x] Folder browse and breadcrumbs, tap a breadcrumb (2026-11-10, src > util, tap / returns to the root)
@@ -243,7 +243,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Empty result message (2026-11-10, gitlab.com users)
 - [ ] Exact user and org name search
 - [ ] Pagination
-- [ ] Search history or suggestions if present
+- [x] Search history or suggestions if present (2026-11-10, recent query suggestion with Clear suggestions)
 
 ## 17. Bookmarks and stars
 - [x] Bookmarks tab lists bookmarks added from repo and user menus (2026-11-10, repo bookmark added from the repo menu is listed)
