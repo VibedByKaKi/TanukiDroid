@@ -52,10 +52,10 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Scroll to load the next page
 - [x] Tap an avatar opens that user (2026-11-10, gitlab.com)
 - [x] Tap a repo name opens the repo (2026-11-10, gitlab.com)
-- [ ] Push event row, tap row, tap each listed commit
-- [ ] Create repository, branch and tag rows
+- [x] Push event row, tap row, tap each listed commit (2026-11-10, gitlab.com KaKi87 feed, rows tapped through)
+- [ ] Create repository, branch and tag rows (repository row verified 2026-11-10, branch and tag rows not seen)
 - [ ] Delete branch and tag rows
-- [ ] Issue opened, closed and reopened rows, tap through
+- [ ] Issue opened, closed and reopened rows, tap through (opened rows verified 2026-11-10 on gitlab.com, closed and reopened rows not seen)
 - [ ] Issue comment row, tap through
 - [ ] Pull request opened, closed, reopened and merged rows, tap through (opens the PR screen)
 - [ ] Pull request comment row, tap through (opens the PR screen, not the issue screen)
@@ -171,12 +171,12 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Commit list on the repo Commits tab, paginate (2026-11-10, 50 commits, pages 1-3 load on scroll)
 - [-] Commit list for a file with Follow renames toggle (2026-11-10, History opens; there is no follow-renames toggle because the GitLab commits API cannot follow renames)
 - [x] Commit detail: message, author, stats, files changed (2026-11-10)
-- [ ] Commit menu: Open in browser, Share
+- [x] Commit menu: Open in browser, Share (2026-11-10, toolbar shows both on a commit)
 - [ ] Open a changed file from a commit
 - [x] Commit comments tab: add comment (2026-11-10, list, add; comments now use the discussions API and render markdown)
 - [-] Commit comment actions: Share, Reply, Add comment, Add reaction, Edit, Delete (2026-11-10, Share, Edit and Delete verified on the server; Reply and reactions not on GitLab commit comments)
-- [ ] Commit compare view between two refs
-- [ ] Commit status box
+- [x] Commit compare view between two refs (2026-11-10, deep link to a compare URL lists the commits)
+- [x] Commit status box (2026-11-10, PR !6 conversation shows 1 failing, 1 pending, 1 successful and expands)
 
 ## 12. Repository (`repo_menu`)
 - [x] About tab: description, language, counts (2026-11-10, counts match the server; language unknown on GitLab)
