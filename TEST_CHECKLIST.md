@@ -287,12 +287,12 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Empty view text on every list (checked so far: releases, forks, users search, bookmarks, notifications)
 
 ## 22. Deep links and intents
-- [ ] GitLab repo URL
-- [ ] Issue URL
-- [ ] PR URL
-- [ ] Commit URL
+- [x] GitLab repo URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
+- [x] Issue URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
+- [x] PR URL (2026-11-10, gitlab.com gitlab-org/gitlab !1 (old MR without diff refs no longer crashes))
+- [x] Commit URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
 - [ ] File URL on a branch
-- [ ] User and org URL
+- [x] User and org URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
 - [ ] Release URL
 - [ ] Share text into the app
 - [ ] Open in browser from each screen that has the action
@@ -309,5 +309,5 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 - [ ] Issue menu has "Open in new window"; verify it
 - [ ] Close dialog "Not planned" and "Duplicate" reasons (GitLab has only open/closed): hide them or accept
-- [ ] Deep links on custom hosts cannot be registered in the manifest; confirm links to a custom host open in the browser
+- [x] Deep links on custom hosts cannot be registered in the manifest; confirm links to a custom host open in the browser (2026-11-10, link to a host without an account opens the browser)
 - [ ] Emoji shortcodes such as :bug: in issue and PR titles render as text, not emoji

@@ -427,7 +427,8 @@ final class GitLabMapper {
             String instance, JSONObject mr) {
         JSONObject o = newObj();
         put(o, "ref", ref);
-        put(o, "sha", sha != null ? sha : fallbackSha);
+        // Old merge requests have no diff refs. The app needs a non-null base, so use the branch.
+        put(o, "sha", sha != null ? sha : fallbackSha != null ? fallbackSha : ref);
         put(o, "label", ref);
         JSONObject repo = newObj();
         put(repo, "id", projectId);
