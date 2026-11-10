@@ -65,17 +65,17 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Same checks for an org feed
 
 ## 4. Notifications (`notification_list_menu`, `notification_menu`)
-- [ ] List loads, empty state shows when there are none
+- [x] List loads, empty state shows when there are none (2026-11-10, todos list and empty state)
 - [ ] Filter menu: Unread, All, Participating
 - [ ] Mark all as read
-- [ ] Row tap opens the issue, PR or commit
+- [x] Row tap opens the issue, PR or commit (2026-11-10, issue opened from a notification)
 - [ ] Row avatar tap opens the user
 - [ ] Row action button: Mark as read
 - [ ] Row action button: Unsubscribe
 - [ ] Notification polling and the system notification (Settings > Notifications on)
 
 ## 5. My repositories and repository lists (`repo_list_menu`, `repo_filter_*`, `repo_sort`)
-- [ ] My repositories list loads and paginates
+- [x] My repositories list loads and paginates (2026-11-10, list loads; single page only on the test data)
 - [ ] Tap a repo
 - [ ] Search icon filters the list
 - [ ] Filter and Sort menu opens
@@ -106,24 +106,24 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Empty state (2026-11-10, issue and PR lists show the empty text)
 
 ## 7. Issue detail (`issue_menu`, `issue_fragment_menu`, timeline)
-- [ ] Header shows state, number, title, repo
+- [x] Header shows state, number, title, repo (2026-11-10, Issue #1 and PR !3 headers)
 - [ ] Body renders markdown, images, code blocks, task lists
-- [ ] Labels, assignees, milestone, reactions shown
+- [x] Labels, assignees, milestone, reactions shown (2026-11-10, issue 1 and 3)
 - [ ] Timeline events: comment, label change, assign, close, reopen, rename, cross reference, commit reference
-- [ ] Menu: Close
-- [ ] Menu: Reopen
+- [x] Menu: Close (2026-11-10, issue 5 closed and reopened, state verified on the server)
+- [x] Menu: Reopen (2026-11-10, issue 5 closed and reopened, state verified on the server)
 - [ ] Menu: Share
 - [ ] Menu: Open in browser
 - [ ] Menu: Copy number
 - [ ] Edit button opens the issue editor and saves title, body, labels, assignee, milestone
-- [ ] Comment box: type and send
+- [x] Comment box: type and send (2026-11-10, comment appears on the server)
 - [ ] Comment box: advanced editor toggle
 - [ ] Comment box: attach button
 - [ ] Markdown buttons: bold, italic, strikethrough, h1, h2, h3, quote, code, link, image, bullet list, number list, task list, divider
-- [ ] Comment overflow: Share, Add reaction, Edit, Delete, View in file
+- [x] Comment overflow: Share, Add reaction, Edit, Delete, View in file (2026-11-10, edit and delete only for own comments)
 - [ ] Text selection menu: Quote
-- [ ] Reaction picker: +1, -1, laugh, hooray, confused, heart, rocket, eyes, and the Loading state
-- [ ] Reaction bar tap adds and removes a reaction
+- [x] Reaction picker: +1, -1, laugh, hooray, confused, heart, rocket, eyes, and the Loading state (2026-11-10, add, list and remove reactions on an issue and on a comment; rocket and eyes are cut off in the popup on this screen size)
+- [x] Reaction bar tap adds and removes a reaction (2026-11-10, tap on the count opens Remove reaction)
 - [ ] Tap a user avatar and extra text in a comment
 - [ ] Link inside markdown opens the right screen
 - [ ] Rotate keeps the draft and scroll position
@@ -140,28 +140,28 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Milestone detail issue list
 
 ## 9. Pull request detail (`pullrequest_menu`, `pull_request_fragment_menu`)
-- [ ] Conversation tab: header, branch info (head into base), status
-- [ ] Commit status box: header tap and each row tap
-- [ ] Commits tab, open a commit
-- [ ] Files tab, open a file diff
-- [ ] Menu: Merge (all merge styles GitLab offers)
-- [ ] Menu: Review
-- [ ] Menu: Reopen
-- [ ] Menu: Close
+- [x] Conversation tab: header, branch info (head into base), status (2026-11-10, PR !1, !3, !5)
+- [x] Commit status box: header tap and each row tap (2026-11-10, 1 failing, 1 pending, 1 successful)
+- [x] Commits tab, open a commit (2026-11-10)
+- [x] Files tab, open a file diff (2026-11-10)
+- [x] Menu: Merge (all merge styles GitLab offers) (2026-11-10, merged !4 and !5 as maintainer; non-maintainer gets a 403 message)
+- [x] Menu: Review (2026-11-10, comment and request changes create a note; approve checked through the API)
+- [x] Menu: Reopen (2026-11-10, PR !1 closed and reopened, state verified on the server)
+- [x] Menu: Close (2026-11-10, PR !1 closed and reopened, state verified on the server)
 - [ ] Menu: Share
 - [ ] Menu: Open in browser
 - [ ] Menu: Copy number
 - [ ] Delete branch after merge
-- [ ] Comment, edit and delete a PR comment
-- [ ] Create pull request
-- [ ] Merged and closed states render correctly
+- [x] Comment, edit and delete a PR comment (2026-11-10, comment created and deleted on the server)
+- [-] Create pull request (2026-11-10, the app has no create pull request screen (same as OctoDroid))
+- [x] Merged and closed states render correctly (2026-11-10)
 
 ## 10. Reviews and diffs (`review_menu`, `review_diff_hunk_menu`, diff viewer)
 - [ ] Review list in the PR conversation, expand details
 - [ ] Review comment tap and avatar tap
 - [ ] Review overflow: Share, Open in browser
 - [ ] Diff hunk menu: Share, View in file
-- [ ] Diff viewer for a commit and for a PR file
+- [x] Diff viewer for a commit and for a PR file (2026-11-10, PR file diff renders with the inline comment)
 - [ ] Add inline comment, reply, edit, delete
 - [ ] Share a diff line (`file_line_menu`)
 - [ ] Large and binary diffs do not crash
@@ -170,7 +170,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 ## 11. Commits (`commit_menu`, `commit_comment_actions`, `commit_history_menu`)
 - [ ] Commit list on the repo Commits tab, paginate
 - [ ] Commit list for a file with Follow renames toggle
-- [ ] Commit detail: message, author, stats, files changed
+- [x] Commit detail: message, author, stats, files changed (2026-11-10)
 - [ ] Commit menu: Open in browser, Share
 - [ ] Open a changed file from a commit
 - [ ] Commit comments tab: add comment
@@ -179,25 +179,25 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Commit status box
 
 ## 12. Repository (`repo_menu`)
-- [ ] About tab: description, language, counts
+- [x] About tab: description, language, counts (2026-11-10, counts match the server; language unknown on GitLab)
 - [ ] Counts match the server for issues, pull requests, forks, stars, watchers
 - [ ] Tap each count row opens its list
-- [ ] README expand and collapse, relative links and images
+- [x] README expand and collapse, relative links and images (2026-11-10, image and emoji render)
 - [ ] Overview row taps (owner, homepage)
-- [ ] Menu: Select branch, switch to a tag and to another branch
+- [x] Menu: Select branch, switch to a tag and to another branch (2026-11-10, branch feature shows NEW.txt)
 - [ ] Menu: Share
 - [ ] Menu: Open in browser
-- [ ] Menu: Search code and open a result
+- [-] Menu: Search code and open a result (2026-11-10, GitLab code search needs Elasticsearch, the entry is hidden)
 - [ ] Menu: Download code as ZIP
-- [ ] Menu: Bookmark and remove bookmark
-- [ ] Star, unstar
+- [x] Menu: Bookmark and remove bookmark (2026-11-10, bookmark list opens the repo)
+- [x] Star, unstar (2026-11-10, server star count checked)
 - [ ] Watch, unwatch
 - [ ] Fork
-- [ ] Other information: Contributors, Collaborators, Releases, Wiki
-- [ ] Wiki list and a wiki page (hidden or clear message when the wiki is off)
+- [x] Other information: Contributors, Collaborators, Releases, Wiki (2026-11-10, all four screens load)
+- [x] Wiki list and a wiki page (hidden or clear message when the wiki is off) (2026-11-10, pages render as HTML)
 - [ ] Activity tab, open an item
 - [ ] Empty repo
-- [ ] Private repo
+- [x] Private repo (2026-11-10, alice/secret listed and openable)
 - [ ] Archived and mirror repo
 
 ## 13. Files (`file_viewer_menu`, content list)

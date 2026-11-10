@@ -349,6 +349,14 @@ final class GitLabRoutes {
                 return c.error(up);
             }
             JSONObject p = up.obj();
+            if (!p.has("open_issues_count") && p.optBoolean("issues_enabled", true)) {
+                // Anonymous requests get a reduced project without the issue counter.
+                Up issues = c.get("/projects/" + c.project() + "/issues", "state", "opened",
+                        "per_page", "1");
+                if (issues.ok() && issues.total() >= 0) {
+                    put(p, "open_issues_count", issues.total());
+                }
+            }
             PROJECTS.put(c.instance() + "|" + p.optLong("id"), p);
             return c.json(GitLabMapper.project(p));
         });

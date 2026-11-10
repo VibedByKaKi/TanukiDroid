@@ -273,6 +273,21 @@ final class GitLabPullRoutes {
                     "per_page", "100");
             JSONArray in = up.arr();
             JSONArray out = new JSONArray();
+            // Every diff discussion is shown as a review of its own, so that the app groups the
+            // comments with their code like it does for GitHub reviews.
+            Up discussions = c.get(mr(c) + "/discussions", "per_page", "100");
+            JSONArray da = discussions.arr();
+            for (int i = 0; i < da.length(); i++) {
+                JSONArray dn = da.optJSONObject(i).optJSONArray("notes");
+                JSONObject first = dn != null && dn.length() > 0 ? dn.optJSONObject(0) : null;
+                if (first == null || first.optBoolean("system")
+                        || first.optJSONObject("position") == null) {
+                    continue;
+                }
+                JSONObject r = review(first, "COMMENTED");
+                put(r, "commit_id", str(first.optJSONObject("position"), "head_sha"));
+                out.put(r);
+            }
             for (int i = 0; i < in.length(); i++) {
                 JSONObject n = in.optJSONObject(i);
                 String body = str(n, "body");
@@ -513,7 +528,7 @@ final class GitLabPullRoutes {
         if (!first.equals(n) && first.optLong("id") != n.optLong("id")) {
             put(o, "in_reply_to_id", first.optLong("id"));
         }
-        put(o, "pull_request_review_id", null);
+        put(o, "pull_request_review_id", first.optLong("id"));
         return o;
     }
 
