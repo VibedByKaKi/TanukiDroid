@@ -282,7 +282,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Image viewer from markdown
 - [x] Web view find bar: find previous, find next (2026-11-10, match counter, next and previous work)
 - [x] Print menu (2026-11-10, print preview shows title and code)
-- [ ] Pull to refresh on every paged list
+- [x] Pull to refresh on every paged list (2026-11-10, feed, notifications, repositories, issues and pull requests reload on pull down)
 - [x] Error view TRY AGAIN retries (2026-11-10, airplane test and a transient failure both recover)
 - [ ] Empty view text on every list (checked so far: releases, forks, users search, bookmarks, notifications)
 
