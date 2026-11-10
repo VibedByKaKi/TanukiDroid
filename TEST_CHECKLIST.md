@@ -90,7 +90,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 ## 6. Issue lists (`issue_list_menu`, `issue_list_filter*`, `issue_list_sort`)
 - [x] My issues tabs: Created, Assigned, Mentioned, Participating (2026-11-10, tabs list the expected issues for alice; Mentioned uses a text search for the user name, which GitLab has no filter for)
 - [x] Show closed toggle and Open Issues title (2026-11-10, checked on My pull requests)
-- [ ] Open an item from each tab
+- [x] Open an item from each tab (2026-11-10, assigned, mentioned and participating items open the issue)
 - [x] Repository issue list opens (2026-11-10)
 - [x] Search in the list (2026-11-10, search for 'renamed' finds the renamed issue)
 - [x] Remove filter (2026-11-10)
@@ -160,7 +160,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Review list in the PR conversation, expand details (2026-11-10, review with its diff hunk and comment opens)
 - [x] Review comment tap and avatar tap (2026-11-10, avatar opens the user)
 - [x] Review overflow: Share, Open in browser (2026-11-10, menu shows both)
-- [ ] Diff hunk menu: Share, View in file
+- [x] Diff hunk menu: Share, View in file (2026-11-10, tap the line number: Share gives the merge request URL with #note_<id>, View in file opens the diff (fixed a crash))
 - [x] Diff viewer for a commit and for a PR file (2026-11-10, PR file diff renders with the inline comment)
 - [x] Add inline comment, reply, edit, delete (2026-11-10, verified on the server)
 - [x] Share a diff line (`file_line_menu`) (2026-11-10, shares a GitLab line code anchor (sha1 of the path plus old and new position); opening that link highlights the line)

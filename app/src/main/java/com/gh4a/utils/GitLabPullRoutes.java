@@ -582,6 +582,10 @@ final class GitLabPullRoutes {
             put(o, "in_reply_to_id", first.optLong("id"));
         }
         put(o, "pull_request_review_id", first.optLong("id") + REVIEW_ID_OFFSET);
+        if (c.raw("number") != null) {
+            put(o, "pull_request_url", "https://github.com/repos/" + c.p("owner") + "/"
+                    + c.p("repo") + "/pulls/" + number(c));
+        }
         return o;
     }
 

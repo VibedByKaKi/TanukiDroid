@@ -48,7 +48,7 @@ public abstract class TimelineItem {
 
     public static class TimelineComment extends TimelineItem {
         private static final Pattern PULL_REQUEST_PATTERN =
-                Pattern.compile(".*github\\.com/repos/([^/]+)/([^/]+)/pulls/(\\d+)");
+                Pattern.compile(".*github\\.com/repos/(.+)/([^/]+)/pulls/(\\d+)");
 
         @NonNull
         private GitHubCommentBase comment;
@@ -111,8 +111,10 @@ public abstract class TimelineItem {
                 return null;
             }
 
-            Matcher matcher = PULL_REQUEST_PATTERN.matcher(reviewComment.pullRequestUrl());
-            if (matcher.matches()) {
+            String pullRequestUrl = reviewComment.pullRequestUrl();
+            Matcher matcher = pullRequestUrl != null
+                    ? PULL_REQUEST_PATTERN.matcher(pullRequestUrl) : null;
+            if (matcher != null && matcher.matches()) {
                 String repoOwner = matcher.group(1);
                 String repoName = matcher.group(2);
                 int pullRequestNumber = Integer.parseInt(matcher.group(3));
