@@ -291,9 +291,9 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Issue URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
 - [x] PR URL (2026-11-10, gitlab.com gitlab-org/gitlab !1 (old MR without diff refs no longer crashes))
 - [x] Commit URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
-- [ ] File URL on a branch
+- [x] File URL on a branch (2026-11-10, branch and tag URLs resolve with a direct lookup instead of paging every branch)
 - [x] User and org URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
-- [ ] Release URL
+- [x] Release URL (2026-11-10, gitlab.com gitlab-org/cli release v1.50.0 opens)
 - [-] Share text into the app (2026-11-10, the app has no SEND handler, as upstream)
 - [ ] Open in browser from each screen that has the action
 

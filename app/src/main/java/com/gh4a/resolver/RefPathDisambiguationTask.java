@@ -11,18 +11,18 @@ import com.gh4a.ApiRequestException;
 import com.gh4a.ServiceFactory;
 import com.gh4a.activities.FileViewerActivity;
 import com.gh4a.activities.RepositoryActivity;
-import com.gh4a.utils.ApiHelpers;
-import com.gh4a.utils.RxUtils;
-import com.meisolsson.githubsdk.model.Branch;
 import com.meisolsson.githubsdk.service.repositories.RepositoryBranchService;
-import com.meisolsson.githubsdk.service.repositories.RepositoryService;
+import com.meisolsson.githubsdk.service.repositories.RepositoryCommitService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import io.reactivex.Single;
 
 public class RefPathDisambiguationTask extends UrlLoadTask {
+    private static final int MAX_REF_SEGMENTS = 4;
     private static final Pattern SHA1_PATTERN = Pattern.compile("[a-z0-9]{40}");
 
     @VisibleForTesting
@@ -113,28 +113,44 @@ public class RefPathDisambiguationTask extends UrlLoadTask {
         }
 
         var branchService = ServiceFactory.getForFullPagedLists(RepositoryBranchService.class, false);
-        var repoService = ServiceFactory.getForFullPagedLists(RepositoryService.class, false);
 
-        // then look for matching branches
-        return ApiHelpers.PageIterator
-                .first(page -> branchService.getBranches(mRepoOwner, mRepoName, page), this::matchesUrlPath)
-                // and tags after that
-                .flatMap(result -> RxUtils.toSingleOrFallback(result, () -> ApiHelpers.PageIterator
-                        .first(page -> repoService.getTags(mRepoOwner, mRepoName, page), this::matchesUrlPath)))
-                .map(this::determineRefAndPathFromFoundRef);
+        var commitService = ServiceFactory.get(RepositoryCommitService.class, false);
+
+        // Ask for each candidate ref name directly instead of paging through every branch and
+        // tag, which takes minutes on a big project. Branches win over tags.
+        List<String> candidates = new ArrayList<>();
+        StringBuilder name = new StringBuilder();
+        String[] parts = mRefAndPath.split("/");
+        for (int i = 0; i < parts.length && i < MAX_REF_SEGMENTS; i++) {
+            name.append(i > 0 ? "/" : "").append(parts[i]);
+            candidates.add(name.toString());
+        }
+        Single<Optional<String>> result = Single.just(Optional.empty());
+        for (String candidate : candidates) {
+            result = result.flatMap(found -> found.isPresent() ? Single.just(found)
+                    : branchService.getBranch(mRepoOwner, mRepoName, candidate)
+                            .map(response -> response.isSuccessful()
+                                    ? Optional.of(candidate) : Optional.<String>empty())
+                            .onErrorReturnItem(Optional.empty()));
+        }
+        // Anything else that resolves to a commit is a tag (or an abbreviated commit id).
+        for (String candidate : candidates) {
+            result = result.flatMap(found -> found.isPresent() ? Single.just(found)
+                    : commitService.getCommit(mRepoOwner, mRepoName, candidate)
+                            .map(response -> response.isSuccessful()
+                                    ? Optional.of(candidate) : Optional.<String>empty())
+                            .onErrorReturnItem(Optional.empty()));
+        }
+        return result.map(this::determineRefAndPathFromFoundRef);
     }
 
-    private boolean matchesUrlPath(Branch ref) {
-        return mRefAndPath.equals(ref.name()) || mRefAndPath.startsWith(ref.name() + "/");
-    }
-
-    private Optional<Pair<String, String>> determineRefAndPathFromFoundRef(Optional<Branch> foundRef) {
+    private Optional<Pair<String, String>> determineRefAndPathFromFoundRef(Optional<String> foundRef) {
         return foundRef.map(ref -> {
-            if (mRefAndPath.equals(ref.name())) {
-                return Pair.create(ref.name(), null);
+            if (mRefAndPath.equals(ref)) {
+                return Pair.create(ref, null);
             } else {
-                String refNameWithSlash = ref.name() + "/";
-                return Pair.create(ref.name(), mRefAndPath.substring(refNameWithSlash.length()));
+                String refNameWithSlash = ref + "/";
+                return Pair.create(ref, mRefAndPath.substring(refNameWithSlash.length()));
             }
         });
     }

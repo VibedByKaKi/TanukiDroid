@@ -1158,11 +1158,12 @@ final class GitLabRoutes {
         route("GET", "repos/{owner}/{repo}/git/refs/{type}", c -> refs(c, c.p("type")));
         route("GET", "repos/{owner}/{repo}/git/matching-refs/{ref*}", c -> {
             String ref = c.p("ref");
+            String name = ref.replaceFirst("^(heads|tags)/?", "");
             Up up = c.getPaged("/projects/" + c.project() + "/repository/"
-                    + (ref.startsWith("tags") ? "tags" : "branches"));
+                    + (ref.startsWith("tags") ? "tags" : "branches"),
+                    "search", name.isEmpty() ? null : "^" + name);
             JSONArray in = up.arr();
             JSONArray out = new JSONArray();
-            String name = ref.replaceFirst("^(heads|tags)/?", "");
             for (int i = 0; i < in.length(); i++) {
                 JSONObject b = in.optJSONObject(i);
                 if (b.optString("name").startsWith(name)) {
@@ -1248,9 +1249,11 @@ final class GitLabRoutes {
     private static JSONObject refObject(String kind, String name, String sha) {
         JSONObject o = newObj();
         put(o, "ref", "refs/" + kind + "/" + name);
+        put(o, "url", "");
         JSONObject obj = newObj();
         put(obj, "sha", sha);
         put(obj, "type", "commit");
+        put(obj, "url", "");
         put(o, "object", obj);
         return o;
     }
