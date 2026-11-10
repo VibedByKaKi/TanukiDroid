@@ -43,7 +43,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Trending Repos (hidden or clear message on GitLab) (2026-11-10, drawer, gitlab.com)
 - [x] GitHub Blog (hidden, since it is GitHub-only) (2026-11-10, drawer, gitlab.com)
 - [x] Settings (2026-11-10, drawer, gitlab.com)
-- [ ] Add account, My profile, Logout from the header menu
+- [x] Add account, My profile, Logout from the header menu (2026-11-10, all three open or act)
 - [ ] Back from each screen returns to the previous one without leaving the app unexpectedly
 - [ ] Drawer swipe open and close, selected item is highlighted
 
@@ -173,8 +173,8 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Commit detail: message, author, stats, files changed (2026-11-10)
 - [ ] Commit menu: Open in browser, Share
 - [ ] Open a changed file from a commit
-- [ ] Commit comments tab: add comment
-- [ ] Commit comment actions: Share, Reply, Add comment, Add reaction, Edit, Delete
+- [x] Commit comments tab: add comment (2026-11-10, list, add; comments now use the discussions API and render markdown)
+- [-] Commit comment actions: Share, Reply, Add comment, Add reaction, Edit, Delete (2026-11-10, Share, Edit and Delete verified on the server; Reply and reactions not on GitLab commit comments)
 - [ ] Commit compare view between two refs
 - [ ] Commit status box
 
@@ -221,15 +221,15 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [ ] Release reaction picker
 
 ## 15. Users, orgs and social
-- [ ] User profile: avatar, bio, counts, email, website
+- [x] User profile: avatar, bio, counts, email, website (2026-11-10, KaKi87 on gitlab.com)
 - [ ] Profile repository count matches the server
-- [ ] Profile menu: Share, Open in browser, Bookmark
-- [ ] Follow and unfollow
-- [ ] Followers list, Following list
+- [x] Profile menu: Share, Open in browser, Bookmark (2026-11-10, menu shows Share, Open in browser, Bookmark, Open in new window)
+- [x] Follow and unfollow (2026-11-10, alice follows bob, button toggles, server confirms)
+- [ ] Followers list, Following list (followers list verified 2026-11-10, following list not yet)
 - [ ] Starred repos of a user
 - [ ] Organizations of a user
-- [ ] Org profile and org repos
-- [ ] Org members list (`OrganizationMemberListFragment`), open a member
+- [x] Org profile and org repos (2026-11-10, tanuki-org on local server; profile and Public Activity)
+- [x] Org members list (`OrganizationMemberListFragment`), open a member (2026-11-10, 1 member, opens root)
 - [ ] Contributors list, open a contributor
 - [ ] Collaborators list
 - [ ] Stargazers and watchers lists

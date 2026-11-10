@@ -606,6 +606,30 @@ final class GitLabRoutes {
         route("GET", "search/issues", c -> GitLabIssueRoutes.searchIssues(c));
     }
 
+    /** Commit comment id to {sha, discussion id}, needed to edit or delete it later. */
+    private static final Map<Long, String[]> COMMIT_NOTES = new HashMap<>();
+
+    private static JSONObject commitComment(JSONObject n, String sha, String discussionId) {
+        long id = n.optLong("id");
+        COMMIT_NOTES.put(id, new String[] {sha, discussionId});
+        JSONObject o = newObj();
+        put(o, "id", id);
+        put(o, "body", str(n, "body"));
+        put(o, "user", GitLabMapper.user(n.optJSONObject("author")));
+        JSONObject pos = n.optJSONObject("position");
+        if (pos != null && !pos.isNull("new_path")) {
+            put(o, "path", str(pos, "new_path"));
+            put(o, "line", pos.optInt("new_line"));
+            put(o, "position", pos.optInt("new_line"));
+        }
+        put(o, "commit_id", sha);
+        put(o, "created_at", GitLabMapper.time(str(n, "created_at")));
+        put(o, "updated_at", GitLabMapper.time(str(n, "updated_at")));
+        put(o, "author_association", "NONE");
+        put(o, "reactions", GitLabMapper.reactionCounts(newObj()));
+        return o;
+    }
+
     static JSONObject searchResult(JSONArray items, Up up) {
         JSONObject o = newObj();
         int total = up != null && up.total() >= 0 ? up.total() : items.length();
@@ -942,50 +966,92 @@ final class GitLabRoutes {
         });
         route("GET", "repos/{owner}/{repo}/commits/{sha}/comments", c -> {
             Up up = c.getPaged("/projects/" + c.project() + "/repository/commits/"
-                    + enc(c.p("sha")) + "/comments");
+                    + enc(c.p("sha")) + "/discussions");
             if (!up.ok()) {
                 return c.error(up);
             }
             JSONArray in = up.arr();
             JSONArray out = new JSONArray();
             for (int i = 0; i < in.length(); i++) {
-                JSONObject n = in.optJSONObject(i);
-                JSONObject o = newObj();
-                put(o, "id", (long) (c.p("sha").hashCode() & 0x7fffffff) * 1000 + i);
-                put(o, "body", str(n, "note"));
-                put(o, "user", GitLabMapper.user(n.optJSONObject("author")));
-                put(o, "path", str(n, "path"));
-                put(o, "line", n.has("line") && !n.isNull("line") ? n.optInt("line") : null);
-                put(o, "position", n.has("line") && !n.isNull("line") ? n.optInt("line") : null);
-                put(o, "commit_id", c.p("sha"));
-                put(o, "created_at", GitLabMapper.time(str(n.optJSONObject("author") != null
-                        ? n : n, "created_at")));
-                out.put(o);
+                JSONObject d = in.optJSONObject(i);
+                JSONArray notes = d.optJSONArray("notes");
+                for (int j = 0; notes != null && j < notes.length(); j++) {
+                    JSONObject n = notes.optJSONObject(j);
+                    if (n.optBoolean("system")) {
+                        continue;
+                    }
+                    out.put(commitComment(n, c.p("sha"), str(d, "id")));
+                }
             }
+            GitLabHtml.attach(c, out, c.p("owner") + "/" + c.p("repo"));
             return c.jsonPaged(out, up);
         });
         route("POST", "repos/{owner}/{repo}/commits/{sha}/comments", c -> {
             JSONObject in = c.bodyJson();
             JSONObject body = newObj();
-            put(body, "note", str(in, "body"));
+            put(body, "body", str(in, "body"));
+            Up up;
             if (in.has("path") && !in.isNull("path")) {
-                put(body, "path", str(in, "path"));
-                put(body, "line", in.optInt("line", in.optInt("position", 1)));
-                put(body, "line_type", "new");
+                // Inline comments only exist in the legacy endpoint, which has no note ids.
+                JSONObject legacy = newObj();
+                put(legacy, "note", str(in, "body"));
+                put(legacy, "path", str(in, "path"));
+                put(legacy, "line", in.optInt("line", in.optInt("position", 1)));
+                put(legacy, "line_type", "new");
+                up = c.call("POST", "/projects/" + c.project() + "/repository/commits/"
+                        + enc(c.p("sha")) + "/comments", legacy);
+                if (!up.ok()) {
+                    return c.error(up);
+                }
+                JSONObject n = up.obj();
+                JSONObject o = newObj();
+                put(o, "id", System.currentTimeMillis());
+                put(o, "body", str(n, "note"));
+                put(o, "user", GitLabMapper.user(n.optJSONObject("author")));
+                put(o, "path", str(in, "path"));
+                put(o, "commit_id", c.p("sha"));
+                put(o, "created_at", GitLabMapper.time(str(n, "created_at")));
+                put(o, "updated_at", GitLabMapper.time(str(n, "created_at")));
+                put(o, "author_association", "NONE");
+                put(o, "reactions", GitLabMapper.reactionCounts(newObj()));
+                GitLabHtml.attach(c, o, c.p("owner") + "/" + c.p("repo"));
+                return c.json(o);
             }
-            Up up = c.call("POST", "/projects/" + c.project() + "/repository/commits/"
-                    + enc(c.p("sha")) + "/comments", body);
+            up = c.call("POST", "/projects/" + c.project() + "/repository/commits/"
+                    + enc(c.p("sha")) + "/discussions", body);
             if (!up.ok()) {
                 return c.error(up);
             }
-            JSONObject n = up.obj();
-            JSONObject o = newObj();
-            put(o, "id", System.currentTimeMillis());
-            put(o, "body", str(n, "note"));
-            put(o, "user", GitLabMapper.user(n.optJSONObject("author")));
-            put(o, "commit_id", c.p("sha"));
-            put(o, "created_at", GitLabMapper.time(str(n, "created_at")));
+            JSONObject d = up.obj();
+            JSONArray notes = d.optJSONArray("notes");
+            JSONObject o = commitComment(notes.optJSONObject(0), c.p("sha"), str(d, "id"));
+            GitLabHtml.attach(c, o, c.p("owner") + "/" + c.p("repo"));
             return c.json(o);
+        });
+        route("PATCH", "repos/{owner}/{repo}/comments/{id}", c -> {
+            String[] where = COMMIT_NOTES.get(Long.parseLong(c.raw("id")));
+            if (where == null) {
+                return c.notFound("Reload the comments first.");
+            }
+            JSONObject body = newObj();
+            put(body, "body", str(c.bodyJson(), "body"));
+            Up up = c.call("PUT", "/projects/" + c.project() + "/repository/commits/"
+                    + enc(where[0]) + "/discussions/" + where[1] + "/notes/" + c.raw("id"), body);
+            if (!up.ok()) {
+                return c.error(up);
+            }
+            JSONObject o = commitComment(up.obj(), where[0], where[1]);
+            GitLabHtml.attach(c, o, c.p("owner") + "/" + c.p("repo"));
+            return c.json(o);
+        });
+        route("DELETE", "repos/{owner}/{repo}/comments/{id}", c -> {
+            String[] where = COMMIT_NOTES.get(Long.parseLong(c.raw("id")));
+            if (where == null) {
+                return c.notFound("Reload the comments first.");
+            }
+            Up up = c.call("DELETE", "/projects/" + c.project() + "/repository/commits/"
+                    + enc(where[0]) + "/discussions/" + where[1] + "/notes/" + c.raw("id"), null);
+            return up.ok() ? c.empty(204) : c.error(up);
         });
         route("GET", "repos/{owner}/{repo}/comments", c -> c.json(new JSONArray()));
         route("GET", "repos/{owner}/{repo}/commits/{sha}/statuses", c -> statuses(c));
