@@ -176,6 +176,19 @@ public class LoginModeChooserFragment extends DialogFragment {
             }
 
             @Override
+            public void onReceivedError(WebView view, WebResourceRequest request,
+                    android.webkit.WebResourceError error) {
+                Log.w(TAG, "WebView error " + error.getErrorCode() + " "
+                        + error.getDescription() + " for " + request.getUrl());
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request,
+                    android.webkit.WebResourceResponse response) {
+                Log.w(TAG, "WebView HTTP " + response.getStatusCode() + " for " + request.getUrl());
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return false;
             }
@@ -319,6 +332,7 @@ public class LoginModeChooserFragment extends DialogFragment {
         if (mWebView == null) {
             return;
         }
+        mWebView.clearCache(true);
         mCurrentInstanceUrl = null;
         mLoginInProgress = false;
         reloadWebViewIfReady();
