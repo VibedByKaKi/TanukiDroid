@@ -238,7 +238,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 
 ## 16. Search (`search`)
 - [x] Type selector: repositories, users, issues, pull requests, code (2026-11-10, only Repository and User are offered, which is intended on GitLab)
-- [ ] Submit search with keyboard and with the search icon (keyboard submit works, icon not tested)
+- [x] Submit search with keyboard and with the search icon (keyboard submit works; the search screen has no separate search icon, 2026-11-11)
 - [x] Open a result of each type (2026-11-10, repo and user results open on gitlab.com; issue, PR and code types are not offered)
 - [x] Empty result message (2026-11-10, gitlab.com users)
 - [x] Exact user and org name search (2026-11-10, tanuki-org finds the group and sub group)
