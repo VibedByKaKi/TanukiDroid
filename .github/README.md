@@ -16,6 +16,10 @@ The APK is a rolling GitHub prerelease on the [`latest`](https://github.com/Vibe
 - **API translation.** The app still speaks the GitHub-shaped SDK of OctoDroid. `GitLabCompatInterceptor` sends each request to the GitLab REST API v4 and converts the answer back. Merge requests appear as pull requests, with the number range starting at 1,000,000,000 internally and shown as `!N`.
 - **Application ID.** `com.vibedbykaki.tanukidroid`
 
+## Screenshot
+
+![](../screenshot.webp)
+
 ## CI
 
 - **Build APK** runs on push, pull request and manual dispatch. It uploads `TanukiDroid-release-<run_number>.apk` with `archive: false`. Pushes to `master` also replace the `latest` prerelease with `TanukiDroid.apk`.
