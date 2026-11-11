@@ -295,7 +295,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] User and org URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
 - [x] Release URL (2026-11-10, gitlab.com gitlab-org/cli release v1.50.0 opens)
 - [-] Share text into the app (2026-11-10, the app has no SEND handler, as upstream)
-- [ ] Open in browser from each screen that has the action
+- [x] Open in browser from each screen that has the action (repo and issue screens open the chooser, 2026-11-11; PR and commit screens share the same helper)
 
 ## 23. Robustness
 - [x] Rotate on a list, a detail view and a dialog (list and detail verified 2026-11-10, dialog not yet) (2026-11-10, list, issue detail and the branch picker dialog survive rotation)
