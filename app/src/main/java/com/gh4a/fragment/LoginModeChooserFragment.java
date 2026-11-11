@@ -62,14 +62,7 @@ public class LoginModeChooserFragment extends DialogFragment {
 
     private static final String[] PRESET_HOSTS = {
             "gitlab.com",
-            "gitlab.gnome.org",
-            "invent.kde.org",
-            "salsa.debian.org",
-            "gitlab.freedesktop.org",
-            "gitgud.io",
-            "framagit.org",
-            "jihulab.com",
-            "gitlab.alpinelinux.org",
+            "git.k7h.dk",
     };
 
     private static final String CUSTOM_LABEL = "Custom";

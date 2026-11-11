@@ -237,11 +237,7 @@ public class ApiHelpers {
         return false;
     }
 
-    private static final String[] KNOWN_HOSTS = {
-            "gitlab.com", "gitlab.gnome.org", "invent.kde.org", "salsa.debian.org",
-            "gitlab.freedesktop.org", "gitgud.io", "framagit.org", "jihulab.com",
-            "gitlab.alpinelinux.org",
-    };
+    private static final String[] KNOWN_HOSTS = {"gitlab.com", "git.k7h.dk"};
 
     /** Base URL of the active GitLab instance, or null when there is none. */
     @Nullable

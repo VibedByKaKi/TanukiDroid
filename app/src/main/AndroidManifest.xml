@@ -156,55 +156,13 @@
                     android:host="gitlab.com"
                     android:scheme="https" />
                 <data
-                    android:host="gitlab.gnome.org"
-                    android:scheme="https" />
-                <data
-                    android:host="invent.kde.org"
-                    android:scheme="https" />
-                <data
-                    android:host="salsa.debian.org"
-                    android:scheme="https" />
-                <data
-                    android:host="gitlab.freedesktop.org"
-                    android:scheme="https" />
-                <data
-                    android:host="gitgud.io"
-                    android:scheme="https" />
-                <data
-                    android:host="framagit.org"
-                    android:scheme="https" />
-                <data
-                    android:host="jihulab.com"
-                    android:scheme="https" />
-                <data
-                    android:host="gitlab.alpinelinux.org"
+                    android:host="git.k7h.dk"
                     android:scheme="https" />
                 <data
                     android:host="gitlab.com"
                     android:scheme="http" />
                 <data
-                    android:host="gitlab.gnome.org"
-                    android:scheme="http" />
-                <data
-                    android:host="invent.kde.org"
-                    android:scheme="http" />
-                <data
-                    android:host="salsa.debian.org"
-                    android:scheme="http" />
-                <data
-                    android:host="gitlab.freedesktop.org"
-                    android:scheme="http" />
-                <data
-                    android:host="gitgud.io"
-                    android:scheme="http" />
-                <data
-                    android:host="framagit.org"
-                    android:scheme="http" />
-                <data
-                    android:host="jihulab.com"
-                    android:scheme="http" />
-                <data
-                    android:host="gitlab.alpinelinux.org"
+                    android:host="git.k7h.dk"
                     android:scheme="http" />
             </intent-filter>
         </activity>
