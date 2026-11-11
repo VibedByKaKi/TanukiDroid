@@ -126,7 +126,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Reaction bar tap adds and removes a reaction (2026-11-10, tap on the count opens Remove reaction)
 - [x] Tap a user avatar and extra text in a comment (avatar opens the profile; the name inserts @user into the reply box, 2026-11-11)
 - [x] Link inside markdown opens the right screen (2026-11-10, #2, !1, commit sha and @alice open issue, PR, commit and user)
-- [ ] Rotate keeps the draft and scroll position (draft kept 2026-11-10, scroll position not checked)
+- [x] Rotate keeps the draft and scroll position (verified 2026-11-11)
 
 ## 8. Create and edit issue, labels, milestones
 - [x] Create issue with title and body (2026-11-10, issue template Bug.md from .gitlab/issue_templates fills the body)
