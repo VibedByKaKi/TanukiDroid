@@ -124,7 +124,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Text selection menu: Quote (2026-11-10, inserts > comment into the comment box)
 - [x] Reaction picker: +1, -1, laugh, hooray, confused, heart, rocket, eyes, and the Loading state (2026-11-10, add, list and remove reactions on an issue and on a comment; rocket and eyes are cut off in the popup on this screen size)
 - [x] Reaction bar tap adds and removes a reaction (2026-11-10, tap on the count opens Remove reaction)
-- [ ] Tap a user avatar and extra text in a comment
+- [x] Tap a user avatar and extra text in a comment (avatar opens the profile; the name inserts @user into the reply box, 2026-11-11)
 - [x] Link inside markdown opens the right screen (2026-11-10, #2, !1, commit sha and @alice open issue, PR, commit and user)
 - [ ] Rotate keeps the draft and scroll position (draft kept 2026-11-10, scroll position not checked)
 
