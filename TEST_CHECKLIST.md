@@ -302,7 +302,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Background and resume (2026-11-10, HOME then relaunch keeps the screen)
 - [x] Airplane mode on a list shows a readable error, then TRY AGAIN recovers (2026-11-10, My repositories: error then TRY AGAIN loads the list)
 - [x] Slow network does not duplicate rows (2026-11-10, feed under emulated GSM speed and GPRS delay, no duplicated rows)
-- [ ] Release build behaves like debug (R8 does not strip the interceptor models)
+- [x] Release build behaves like debug (R8 does not strip the interceptor models; gitlab.com login and News Feed verified on the CI release APK, 2026-11-11)
 - [x] Back stack after deep link (2026-11-10, back from a deep-linked issue leaves the app, as expected for an external link)
 
 - [x] Re-check markdown rendering on issue body, issue comments, commit comments, release notes, review bodies (body_html is now synthesized) (2026-11-10, issue body and comments, commit comments, release notes and review comments render)
