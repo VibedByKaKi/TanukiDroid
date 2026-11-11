@@ -44,7 +44,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] GitHub Blog (hidden, since it is GitHub-only) (2026-11-10, drawer, gitlab.com)
 - [x] Settings (2026-11-10, drawer, gitlab.com)
 - [x] Add account, My profile, Logout from the header menu (2026-11-10, all three open or act)
-- [ ] Back from each screen returns to the previous one without leaving the app unexpectedly
+- [x] Back from each screen returns to the previous one without leaving the app unexpectedly (exercised on repo, issue, PR, review, diff, bookmarks and search screens throughout testing)
 - [x] Drawer swipe open and close, selected item is highlighted (2026-11-10, Search is highlighted while open)
 
 ## 3. News Feed
