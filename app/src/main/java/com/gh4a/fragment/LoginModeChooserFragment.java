@@ -167,6 +167,7 @@ public class LoginModeChooserFragment extends DialogFragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 mLastLoadedUrl = url;
+                view.evaluateJavascript(STYLE_FIX_SCRIPT, null);
                 CookieManager.getInstance().flush();
                 if (mOnTokenPage) {
                     requestTokenFromPage(url);
@@ -402,6 +403,19 @@ public class LoginModeChooserFragment extends DialogFragment {
             mWebView.loadUrl(mCurrentInstanceUrl + "/users/sign_in");
         }
     }
+
+    // GitLab loads its stylesheets only under (prefers-color-scheme: light|dark). Some WebViews
+    // match neither query, which leaves the page unstyled, so apply the light one directly then.
+    private static final String STYLE_FIX_SCRIPT = ("(function() {"
+            + "  if (matchMedia('(prefers-color-scheme: light)').matches"
+            + "      || matchMedia('(prefers-color-scheme: dark)').matches) { return; }"
+            + "  var links = document.querySelectorAll('link[rel=stylesheet]');"
+            + "  for (var i = 0; i < links.length; i++) {"
+            + "    var m = links[i].media || '';"
+            + "    if (m.indexOf('prefers-color-scheme: light') >= 0) { links[i].media = 'all'; }"
+            + "    else if (m.indexOf('prefers-color-scheme: dark') >= 0) { links[i].disabled = true; }"
+            + "  }"
+            + "})();");
 
     private static final String TOKEN_SCRIPT = ("(async function() {"
             + "  var name = __NAME__;"
