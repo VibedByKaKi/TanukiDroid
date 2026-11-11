@@ -248,7 +248,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 ## 17. Bookmarks and stars
 - [x] Bookmarks tab lists bookmarks added from repo and user menus (2026-11-10, repo bookmark added from the repo menu is listed)
 - [x] Open a bookmark (2026-11-10, opens the repo)
-- [ ] Remove a bookmark (long press or swipe) (removal via the repo menu works; list gesture not found)
+- [x] Remove a bookmark (swipe right on the list item removes it, 2026-11-11; long press opens it)
 - [x] Starred tab lists starred repos (2026-11-10, 2 gitlab.com stars with counts)
 - [x] Starred sort order (2026-11-10, Oldest and Newest flip the list)
 
