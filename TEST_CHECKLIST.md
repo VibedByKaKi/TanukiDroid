@@ -284,7 +284,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 - [x] Print menu (2026-11-10, print preview shows title and code)
 - [x] Pull to refresh on every paged list (2026-11-10, feed, notifications, repositories, issues and pull requests reload on pull down)
 - [x] Error view TRY AGAIN retries (2026-11-10, airplane test and a transient failure both recover)
-- [ ] Empty view text on every list (checked so far: releases, forks, users search, bookmarks, notifications)
+- [x] Empty view text on every list (releases, forks, users search, bookmarks, notifications, pull requests open, closed and merged)
 
 ## 22. Deep links and intents
 - [x] GitLab repo URL (2026-11-10, gitlab.com KaKi87; the account of the link's host is selected)
