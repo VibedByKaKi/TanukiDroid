@@ -190,11 +190,14 @@ public class LoginModeChooserFragment extends DialogFragment {
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.add_account)
                 .setView(view)
+                .setNeutralButton(R.string.reload, null)
                 .setNegativeButton(R.string.cancel, (d, which) -> d.cancel())
                 .create();
 
         dialog.setOnShowListener(d -> {
             applyInstanceLabelSize();
+            // Set here so that the dialog stays open after the click.
+            dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> forceReload());
             Window window = dialog.getWindow();
             if (window != null && getActivity() != null) {
                 DisplayMetrics metrics = new DisplayMetrics();
@@ -310,6 +313,15 @@ public class LoginModeChooserFragment extends DialogFragment {
         mOnTokenPage = false;
         mTokenRequested = false;
         mWebView.loadUrl(instance + "/users/sign_in");
+    }
+
+    private void forceReload() {
+        if (mWebView == null) {
+            return;
+        }
+        mCurrentInstanceUrl = null;
+        mLoginInProgress = false;
+        reloadWebViewIfReady();
     }
 
     private void maybeHandleSession() {

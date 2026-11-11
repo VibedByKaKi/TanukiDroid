@@ -33,6 +33,7 @@
     <string name="my_profile">My profile</string>
     <string name="user_context">Account</string>
     <string name="add_account">Add account</string>
+    <string name="reload">Reload</string>
     <string name="my_web">https://github.com/VibedByKaKi/TanukiDroid</string>
     <string name="my_issues_url">https://github.com/VibedByKaKi/TanukiDroid/issues</string>
     <string name="my_username">VibedByKaKi</string>
