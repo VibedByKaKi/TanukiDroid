@@ -279,7 +279,7 @@ Test against the local GitLab CE container (`http://10.0.2.2:8929`, accounts `al
 ## 21. Dialogs and shared widgets
 - [x] Single-choice dialogs (ref picker, filter pickers) select and dismiss (2026-11-10, ref picker selects and dismisses; filter menus verified earlier)
 - [x] Markdown rendering: tables, nested lists, HTML, emoji, mentions, issue links (verified 2026-11-11; raw <details> shows its text without collapsing)
-- [ ] Image viewer from markdown
+- [-] Image viewer from markdown (the app has no image viewer; markdown images render over https and a tap opens the image in the browser, checked 2026-11-11 on gitlab-org/cli)
 - [x] Web view find bar: find previous, find next (2026-11-10, match counter, next and previous work)
 - [x] Print menu (2026-11-10, print preview shows title and code)
 - [x] Pull to refresh on every paged list (2026-11-10, feed, notifications, repositories, issues and pull requests reload on pull down)
